@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>GreenGrid — Campus Energy Intelligence</title>
+<title>GreenGrid — Energy Insights & Automation</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Fraunces:wght@600;700&display=swap" rel="stylesheet"/>
@@ -510,14 +510,13 @@
   </div>
   <nav>
     <button class="nav-btn active" onclick="showPage('overview', this)">🌿 Overview</button>
-    <button class="nav-btn" onclick="showPage('hotspots', this)">🔍 Hotspot Model</button>
-    <button class="nav-btn" onclick="showPage('labs', this)">🔬 Lab Intelligence</button>
-    <button class="nav-btn" onclick="showPage('dorms', this)">🏠 Dorm Leaderboard</button>
+    <button class="nav-btn" onclick="showPage('hotspots', this)">🔍 Hotspot Insights</button>
+    <button class="nav-btn" onclick="showPage('labs', this)">🔬 Lab Automation</button>
     <button class="nav-btn" onclick="showPage('roi', this)">💰 ROI Planner</button>
   </nav>
   <div class="status-chip">
     <div class="status-dot"></div>
-    PROTOTYPE — 23 buildings modeled
+    LIVE DEMO — insights + automation
   </div>
 </header>
 
@@ -529,8 +528,8 @@
   <div class="deco-sticker" style="top:5px;right:240px;animation-delay:2s;font-size:1.1rem">☀️</div>
 
   <div class="page-header">
-    <h1><span class="page-icon">🌍</span> Campus Energy Command</h1>
-    <p>Real-time intelligence across 120 buildings · 252.5M kWh annual baseline · $33.6M/yr</p>
+    <h1><span class="page-icon">🌿</span> GreenGrid Overview</h1>
+    <p>Campus-wide energy insights, automation opportunities, and carbon progress across the modeled buildings.</p>
   </div>
 
   <div class="kpi-row">
@@ -558,7 +557,7 @@
 
   <div class="grid-60-40">
     <div class="card">
-      <div class="card-title"><span class="ct-icon">🗺️</span> Campus Hotspot Map — Energy Risk Zones</div>
+      <div class="card-title"><span class="ct-icon">🗺️</span> Campus Insight Map — Energy Risk Zones</div>
       <div id="campus-map">
         <svg class="map-paths" id="map-svg"></svg>
         <div id="map-dots"></div>
@@ -574,7 +573,7 @@
     </div>
 
     <div class="card">
-      <div class="card-title"><span class="ct-icon">⚠️</span> Live Anomaly Feed</div>
+      <div class="card-title"><span class="ct-icon">⚠️</span> Live Insight Feed</div>
       <div class="anomaly-rubric">
         <span class="anomaly-code"><strong>RL</strong> Research Lab</span>
         <span class="anomaly-code"><strong>RH</strong> Residence Hall</span>
@@ -600,7 +599,7 @@
           <div style="font-size:0.74rem;color:var(--text);font-weight:600;margin-top:0.22rem">projected total carbon reduction</div>
           <div style="font-size:0.66rem;color:var(--muted);margin-top:0.16rem">That reaches 95% of the 40% campus carbon goal.</div>
           <div style="margin-top:0.85rem;font-size:0.68rem;font-family:'DM Mono',monospace;line-height:1.7;">
-            <span style="color:var(--accent3);font-weight:600">-23%</span> <span style="color:var(--muted)">site energy use reduction from GreenGrid deployment</span><br/>
+            <span style="color:var(--accent3);font-weight:600">-23%</span> <span style="color:var(--muted)">site energy use reduction from GreenGrid automation</span><br/>
             <span style="color:var(--accent3);font-weight:600">+15%</span> <span style="color:var(--muted)">carbon benefit from solar PPA offsets</span>
           </div>
         </div>
@@ -609,7 +608,7 @@
   </div>
 
   <div class="card" style="margin-bottom:1rem;">
-    <div class="card-title"><span class="ct-icon">📊</span> Typical Day — Energy Demand by Building Type (kW aggregate)</div>
+    <div class="card-title"><span class="ct-icon">📊</span> Demand Profile by Building Type (kW aggregate)</div>
     <div class="chart-wrap" style="height:200px"><canvas id="hourly-chart"></canvas></div>
   </div>
 </div>
@@ -620,12 +619,12 @@
   <div class="deco-sticker" style="top:50px;right:130px;font-size:1rem;animation-delay:1.5s">📍</div>
 
   <div class="page-header">
-    <h1><span class="page-icon">🔍</span> Hotspot Detection Model</h1>
-    <p>Composite risk scoring across energy intensity, inefficiency index, and anomaly frequency</p>
+    <h1><span class="page-icon">🔍</span> Hotspot Insights</h1>
+    <p>GreenGrid scores buildings using intensity, load, age, anomalies, meter visibility, and lab-equipment schedules to surface the best intervention mix.</p>
   </div>
 
   <div class="card">
-    <div class="card-title"><span class="ct-icon">🏗️</span> Hotspot Priority Rankings — Top Buildings Requiring Intervention</div>
+    <div class="card-title"><span class="ct-icon">🏗️</span> Priority Queue — Buildings Requiring Intervention</div>
     <div class="table-scroll">
       <table class="hotspot-table" id="hotspot-table"></table>
     </div>
@@ -643,8 +642,8 @@
   <div class="deco-sticker" style="top:55px;right:180px;font-size:1rem;animation-delay:2s">🌡️</div>
 
   <div class="page-header">
-    <h1><span class="page-icon">🔬</span> Lab Intelligence System</h1>
-    <p>Scheduling optimization, fume hood modeling, heat reuse routing</p>
+    <h1><span class="page-icon">🔬</span> Lab Intelligence</h1>
+    <p>Automation models for the campus's highest-value load category, backed by the same GreenGrid insights layer.</p>
   </div>
 
   <div class="kpi-row">
@@ -671,8 +670,8 @@
   </div>
 
   <div class="tabs">
-    <div class="tab active" onclick="switchTab('lab','schedule', this)">⏰ Off-Peak Scheduler</div>
-    <div class="tab" onclick="switchTab('lab','fumehood', this)">💨 Fume Hood Model</div>
+    <div class="tab active" onclick="switchTab('lab','schedule', this)">⏰ Load Scheduling</div>
+    <div class="tab" onclick="switchTab('lab','fumehood', this)">💨 Smart Ventilation</div>
     <div class="tab" onclick="switchTab('lab','heatreuse', this)">♨️ Heat Reuse Routing</div>
     <div class="tab" onclick="switchTab('lab','thermal', this)">🧊 Thermal Storage</div>
   </div>
@@ -680,13 +679,12 @@
   <div class="tab-content active" id="lab-schedule">
     <div class="grid-60-40">
       <div class="card">
-        <div class="card-title"><span class="ct-icon">📅</span> Deferrable Load Scheduling — Cost Optimization</div>
+        <div class="card-title"><span class="ct-icon">📅</span> Deferrable Equipment Scheduling</div>
         <div class="chart-wrap" style="height:240px"><canvas id="schedule-chart"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-title"><span class="ct-icon">🧮</span> Scheduler Output</div>
+        <div class="card-title"><span class="ct-icon">🧮</span> Schedulable Equipment by Lab</div>
         <div>
-          <div class="card-title" style="margin-bottom:0.5rem;"><span class="ct-icon">🏛️</span> Per-Lab Deferral Capacity</div>
           <div class="chart-wrap" style="height:180px"><canvas id="lab-deferral-chart"></canvas></div>
         </div>
       </div>
@@ -700,7 +698,7 @@
         <div class="chart-wrap" style="height:260px"><canvas id="fumehood-chart"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-title"><span class="ct-icon">📊</span> Sash Position Analysis — Energy vs Safety Model</div>
+        <div class="card-title"><span class="ct-icon">📊</span> Fume Hood Operating Insights</div>
         <div style="padding:1rem 0;">
           <div style="font-size:0.74rem;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:1rem;background:#fef8f0;padding:0.5rem 0.75rem;border-radius:8px;border:1px solid var(--warn-light);">
             ⚠️ Fume hoods at 100% exhaust when unoccupied = $598/hood/yr wasted
@@ -713,7 +711,7 @@
 
   <div class="tab-content" id="lab-heatreuse">
     <div class="card" style="margin-bottom:1rem;">
-      <div class="card-title"><span class="ct-icon">♨️</span> Heat Reuse Flow — Labs → Athletic Facilities</div>
+      <div class="card-title"><span class="ct-icon">♨️</span> Heat Reuse Routing</div>
       <div class="flow-diagram" id="heat-flow"></div>
     </div>
   </div>
@@ -725,52 +723,10 @@
         <div class="chart-wrap" style="height:260px"><canvas id="thermal-chart"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-title"><span class="ct-icon">💵</span> Thermal Storage Economic Model</div>
+        <div class="card-title"><span class="ct-icon">💵</span> Peak Cost Avoided</div>
         <div class="chart-wrap" style="height:180px;margin-top:1rem;"><canvas id="thermal-savings-chart"></canvas></div>
       </div>
     </div>
-  </div>
-</div>
-
-<!-- ═══════════ DORMS ═══════════ -->
-<div class="page" id="page-dorms">
-  <div class="deco-sticker" style="top:8px;right:80px">🏆</div>
-  <div class="deco-sticker" style="top:55px;right:170px;font-size:1rem;animation-delay:1s">⭐</div>
-  <div class="deco-sticker" style="top:5px;right:260px;font-size:0.9rem;animation-delay:2.5s">🌟</div>
-
-  <div class="page-header">
-    <h1><span class="page-icon">🏠</span> Residence Hall Leaderboard</h1>
-    <p>Gamified energy competition — weekly standings · perks for top performers</p>
-  </div>
-
-  <div class="kpi-row">
-    <div class="kpi-card c-blue">
-      <div class="kpi-label">Total Dorm Usage</div>
-      <div class="kpi-value">9.7<span class="kpi-unit">M kWh</span></div>
-      <div class="kpi-delta">5 residence halls tracked</div>
-    </div>
-    <div class="kpi-card c-good">
-      <div class="kpi-label">Weekly Leader</div>
-      <div class="kpi-value" style="font-size:1.1rem;">North Campus</div>
-      <div class="kpi-delta down">↓ 12% vs last week</div>
-    </div>
-    <div class="kpi-card c-warn">
-      <div class="kpi-label">Most Improved</div>
-      <div class="kpi-value" style="font-size:1.1rem;">West Towers</div>
-      <div class="kpi-delta down">↓ 8% vs last week</div>
-    </div>
-    <div class="kpi-card c-danger">
-      <div class="kpi-label">Needs Attention</div>
-      <div class="kpi-value" style="font-size:1.1rem;">South Village</div>
-      <div class="kpi-delta up">↑ 6% vs last week</div>
-    </div>
-  </div>
-
-  <div class="dorm-grid" id="dorm-grid" style="margin-bottom:1.5rem;"></div>
-
-  <div class="card" style="margin-top:1rem;">
-    <div class="card-title"><span class="ct-icon">🧠</span> Behavioral Model — Competition Effect on Energy Reduction</div>
-    <div class="chart-wrap" style="height:240px"><canvas id="behavior-chart"></canvas></div>
   </div>
 </div>
 
@@ -780,12 +736,12 @@
   <div class="deco-sticker" style="top:50px;right:160px;font-size:1rem;animation-delay:1.8s">📊</div>
 
   <div class="page-header">
-    <h1><span class="page-icon">💰</span> ROI Planner & Budget Allocator</h1>
-    <p>$12M budget · 5-year horizon · 40% carbon reduction target by 2035</p>
+    <h1><span class="page-icon">💰</span> ROI Planner</h1>
+    <p>Budget, savings, and phased deployment for the current GreenGrid plan, with solar included in the carbon pathway.</p>
   </div>
 
   <div class="card" style="margin-bottom:1rem;">
-    <div class="card-title"><span class="ct-icon">🏆</span> Investment Portfolio — All Interventions Ranked by ROI</div>
+    <div class="card-title"><span class="ct-icon">🏆</span> Phased Investment Portfolio</div>
     <div class="table-scroll">
       <table class="roi-table" id="roi-table"></table>
     </div>
@@ -797,7 +753,7 @@
   </div>
 
   <div class="card" style="margin-top:1rem;">
-    <div class="card-title"><span class="ct-icon">📅</span> Phased Deployment Timeline</div>
+    <div class="card-title"><span class="ct-icon">📅</span> Deployment Timeline</div>
     <div id="timeline" class="timeline-list"></div>
   </div>
 </div>
@@ -897,6 +853,257 @@ const FALLBACK_US48_DEMAND = [
   {period:'2026-03-29T02-04', value:338281},
 ];
 
+function normalizeHourlyProfile(values) {
+  const total = values.reduce((sum, value) => sum + value, 0) || 1;
+  return values.map(value => value / total);
+}
+
+const EQUIPMENT_SCHEDULES = {
+  continuous: normalizeHourlyProfile([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]),
+  continuousShaved: normalizeHourlyProfile([1.12,1.12,1.1,1.08,1.06,1.04,1,0.96,0.94,0.92,0.9,0.88,0.88,0.88,0.9,0.92,0.94,0.96,1,1.02,1.04,1.06,1.08,1.1]),
+  dayFlat: normalizeHourlyProfile([0.02,0.02,0.02,0.02,0.02,0.03,0.05,0.08,0.12,0.16,0.18,0.19,0.19,0.19,0.18,0.17,0.16,0.14,0.1,0.06,0.04,0.03,0.02,0.02]),
+  shoulderFlat: normalizeHourlyProfile([0.05,0.05,0.05,0.05,0.05,0.06,0.07,0.08,0.08,0.07,0.06,0.05,0.05,0.05,0.05,0.06,0.07,0.09,0.1,0.11,0.1,0.08,0.06,0.05]),
+  dayPeak: normalizeHourlyProfile([0,0,0,0,0,0.01,0.03,0.07,0.11,0.15,0.18,0.2,0.2,0.2,0.18,0.17,0.15,0.13,0.1,0.07,0.03,0.01,0,0]),
+  nightPeak: normalizeHourlyProfile([0.1,0.11,0.11,0.11,0.1,0.09,0.07,0.05,0.03,0.02,0.02,0.02,0.02,0.02,0.03,0.04,0.06,0.08,0.09,0.1,0.11,0.11,0.11,0.1]),
+  middayBatch: normalizeHourlyProfile([0,0,0,0,0,0,0.01,0.02,0.04,0.08,0.12,0.16,0.18,0.16,0.12,0.07,0.03,0.01,0,0,0,0,0,0]),
+  eveningBatch: normalizeHourlyProfile([0,0,0,0,0,0,0,0,0,0.01,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.15,0.13,0.09,0.04,0.02,0,0]),
+  nightBatch: normalizeHourlyProfile([0.1,0.12,0.12,0.11,0.1,0.09,0.07,0.05,0.03,0.02,0.02,0.01,0.01,0.01,0.01,0.02,0.03,0.04,0.05,0.07,0.08,0.09,0.1,0.1]),
+};
+
+const LAB_EQUIPMENT_LIBRARY = {
+  autoclave: { label:'autoclaves', kw:14, hoursPerDay:4.5, shiftableShare:0.8, heatRecoveryShare:0.18, currentProfile:'middayBatch', optimizedProfile:'nightBatch' },
+  glasswasher: { label:'glasswashers', kw:8, hoursPerDay:5, shiftableShare:0.72, heatRecoveryShare:0.16, currentProfile:'middayBatch', optimizedProfile:'eveningBatch' },
+  vacuumPumpBank: { label:'vacuum pump banks', kw:7, hoursPerDay:10, shiftableShare:0.45, heatRecoveryShare:0.34, currentProfile:'dayFlat', optimizedProfile:'shoulderFlat' },
+  processChiller: { label:'process chillers', kw:20, hoursPerDay:18, shiftableShare:0.12, heatRecoveryShare:0.78, currentProfile:'continuous', optimizedProfile:'continuousShaved' },
+  freezerBank: { label:'freezer banks', kw:2.4, hoursPerDay:24, shiftableShare:0.06, heatRecoveryShare:0.28, currentProfile:'continuous', optimizedProfile:'continuousShaved' },
+  growthChamber: { label:'growth chambers', kw:4.8, hoursPerDay:18, shiftableShare:0.18, heatRecoveryShare:0.42, currentProfile:'dayFlat', optimizedProfile:'shoulderFlat' },
+  sequencingRack: { label:'sequencer racks', kw:9, hoursPerDay:12, shiftableShare:0.58, heatRecoveryShare:0.38, currentProfile:'dayPeak', optimizedProfile:'nightPeak' },
+  gpuCluster: { label:'GPU compute racks', kw:16, hoursPerDay:14, shiftableShare:0.65, heatRecoveryShare:0.55, currentProfile:'dayPeak', optimizedProfile:'nightPeak' },
+  dryingOven: { label:'drying ovens', kw:11, hoursPerDay:6, shiftableShare:0.68, heatRecoveryShare:0.47, currentProfile:'middayBatch', optimizedProfile:'nightBatch' },
+  compressorSkid: { label:'compressor skids', kw:9, hoursPerDay:12, shiftableShare:0.42, heatRecoveryShare:0.52, currentProfile:'dayFlat', optimizedProfile:'shoulderFlat' },
+  batteryCycler: { label:'battery cyclers', kw:12, hoursPerDay:14, shiftableShare:0.62, heatRecoveryShare:0.36, currentProfile:'dayPeak', optimizedProfile:'nightPeak' },
+  climateChamber: { label:'climate chambers', kw:7, hoursPerDay:20, shiftableShare:0.22, heatRecoveryShare:0.35, currentProfile:'continuous', optimizedProfile:'continuousShaved' },
+  incubatorRack: { label:'incubator racks', kw:3.2, hoursPerDay:24, shiftableShare:0.08, heatRecoveryShare:0.24, currentProfile:'continuous', optimizedProfile:'continuousShaved' },
+  coldRoom: { label:'cold rooms', kw:10, hoursPerDay:24, shiftableShare:0.1, heatRecoveryShare:0.6, currentProfile:'continuous', optimizedProfile:'continuousShaved' },
+  sterilizerBank: { label:'sterilizer banks', kw:13, hoursPerDay:4, shiftableShare:0.74, heatRecoveryShare:0.18, currentProfile:'middayBatch', optimizedProfile:'nightBatch' },
+};
+
+const LAB_EQUIPMENT = {
+  RL01: [{ type:'incubatorRack', qty:18 }, { type:'freezerBank', qty:14 }, { type:'autoclave', qty:3 }, { type:'sterilizerBank', qty:2 }, { type:'vacuumPumpBank', qty:2 }, { type:'processChiller', qty:1 }],
+  RL02: [{ type:'autoclave', qty:4 }, { type:'glasswasher', qty:3 }, { type:'vacuumPumpBank', qty:4 }, { type:'dryingOven', qty:3 }, { type:'processChiller', qty:2 }, { type:'freezerBank', qty:8 }],
+  RL03: [{ type:'processChiller', qty:2 }, { type:'vacuumPumpBank', qty:5 }, { type:'climateChamber', qty:2 }, { type:'gpuCluster', qty:1 }, { type:'freezerBank', qty:6 }],
+  RL04: [{ type:'growthChamber', qty:8 }, { type:'autoclave', qty:2 }, { type:'glasswasher', qty:2 }, { type:'coldRoom', qty:1 }, { type:'processChiller', qty:1 }],
+  RL05: [{ type:'climateChamber', qty:4 }, { type:'dryingOven', qty:2 }, { type:'freezerBank', qty:6 }, { type:'vacuumPumpBank', qty:2 }, { type:'coldRoom', qty:1 }],
+  RL06: [{ type:'gpuCluster', qty:4 }, { type:'freezerBank', qty:4 }, { type:'sequencingRack', qty:1 }, { type:'vacuumPumpBank', qty:1 }],
+  RL07: [{ type:'sequencingRack', qty:6 }, { type:'freezerBank', qty:10 }, { type:'autoclave', qty:2 }, { type:'glasswasher', qty:2 }, { type:'incubatorRack', qty:10 }],
+  RL08: [{ type:'compressorSkid', qty:4 }, { type:'processChiller', qty:2 }, { type:'dryingOven', qty:2 }, { type:'vacuumPumpBank', qty:2 }, { type:'batteryCycler', qty:2 }],
+  RL09: [{ type:'coldRoom', qty:2 }, { type:'autoclave', qty:2 }, { type:'glasswasher', qty:2 }, { type:'processChiller', qty:1 }, { type:'dryingOven', qty:2 }],
+  RL10: [{ type:'batteryCycler', qty:6 }, { type:'climateChamber', qty:3 }, { type:'compressorSkid', qty:2 }, { type:'processChiller', qty:1 }, { type:'gpuCluster', qty:1 }],
+};
+
+const labEquipmentCache = new Map();
+const LOAD_CONTROLLER_TYPES = ['autoclave', 'glasswasher', 'batteryCycler', 'sequencingRack', 'gpuCluster', 'dryingOven', 'sterilizerBank'];
+const HEAT_REUSE_TYPES = ['processChiller', 'coldRoom', 'compressorSkid', 'freezerBank'];
+const STEADY_LOAD_TYPES = ['processChiller', 'coldRoom', 'climateChamber', 'compressorSkid', 'freezerBank', 'incubatorRack', 'growthChamber'];
+
+function formatEquipmentLabel(type, qty = 1) {
+  const label = LAB_EQUIPMENT_LIBRARY[type]?.label || type;
+  if (qty !== 1) return label;
+  if (label.endsWith('ies')) return label.replace(/ies$/, 'y');
+  if (label.endsWith('s')) return label.slice(0, -1);
+  return label;
+}
+
+function formatEquipmentList(rows, limit = 2) {
+  const items = rows.slice(0, limit).map(row => `${row.qty} ${formatEquipmentLabel(row.type, row.qty)}`);
+  return items.join(', ');
+}
+
+function scheduleWindowLabel(type) {
+  const profile = LAB_EQUIPMENT_LIBRARY[type]?.optimizedProfile;
+  if (profile === 'nightBatch' || profile === 'nightPeak') return 'overnight windows';
+  if (profile === 'eveningBatch') return 'evening shoulder hours';
+  if (profile === 'shoulderFlat') return 'off-peak shoulder hours';
+  return 'cheaper hours';
+}
+
+function getLabEquipmentSummary(building) {
+  if (!building?.id || !LAB_EQUIPMENT[building.id]) return null;
+  if (labEquipmentCache.has(building.id)) return labEquipmentCache.get(building.id);
+
+  const current = Array(24).fill(0);
+  const optimized = Array(24).fill(0);
+  let steadyAnnualKwh = 0;
+  const rows = LAB_EQUIPMENT[building.id].map(item => {
+    const spec = LAB_EQUIPMENT_LIBRARY[item.type];
+    const annualKwh = spec.kw * spec.hoursPerDay * 365 * item.qty;
+    const shiftableKwh = annualKwh * spec.shiftableShare;
+    const recoverableHeatMmbtu = annualKwh * spec.heatRecoveryShare * 0.003412 * 0.35;
+    if (STEADY_LOAD_TYPES.includes(item.type)) steadyAnnualKwh += annualKwh;
+    const currentProfile = EQUIPMENT_SCHEDULES[spec.currentProfile];
+    const optimizedProfile = EQUIPMENT_SCHEDULES[spec.optimizedProfile];
+    currentProfile.forEach((weight, hour) => {
+      current[hour] += spec.kw * spec.hoursPerDay * item.qty * weight;
+    });
+    optimizedProfile.forEach((weight, hour) => {
+      optimized[hour] += spec.kw * spec.hoursPerDay * item.qty * weight;
+    });
+    return { ...item, annualKwh, shiftableKwh, recoverableHeatMmbtu };
+  });
+
+  const summary = {
+    rows,
+    annualKwh: rows.reduce((sum, row) => sum + row.annualKwh, 0),
+    shiftableKwh: rows.reduce((sum, row) => sum + row.shiftableKwh, 0),
+    recoverableHeatMmbtu: rows.reduce((sum, row) => sum + row.recoverableHeatMmbtu, 0),
+    current: current.map(value => Math.round(value)),
+    optimized: optimized.map(value => Math.round(value)),
+    currentPeakKw: Math.max(...current),
+    optimizedPeakKw: Math.max(...optimized),
+  };
+  summary.peakShavedKw = Math.max(0, Math.round(summary.currentPeakKw - summary.optimizedPeakKw));
+  summary.shiftableShare = summary.shiftableKwh / (summary.annualKwh || 1);
+  summary.steadyLoadShare = steadyAnnualKwh / (summary.annualKwh || 1);
+  summary.flexDrivers = [...rows].sort((a, b) => b.shiftableKwh - a.shiftableKwh);
+  summary.heatDrivers = [...rows].sort((a, b) => b.recoverableHeatMmbtu - a.recoverableHeatMmbtu);
+  labEquipmentCache.set(building.id, summary);
+  return summary;
+}
+
+function getInterventionPlan(building) {
+  if (building.type.includes('Research')) {
+    const summary = getLabEquipmentSummary(building);
+    const topFlexType = summary.flexDrivers[0]?.type || '';
+    const topHeatType = summary.heatDrivers[0]?.type || '';
+    const ventilationHeavy = building.hoods >= 35 || building.co2 >= 900;
+    const ventilationModerate = building.hoods >= 24 || building.co2 >= 820 || (building.hoods >= 12 && building.occ >= 0.7);
+    const strongShiftWindow =
+      summary.shiftableKwh >= 180000 &&
+      LOAD_CONTROLLER_TYPES.includes(topFlexType);
+    const strongHeatLoop =
+      summary.recoverableHeatMmbtu >= 320 &&
+      HEAT_REUSE_TYPES.includes(topHeatType);
+    const steadyPeakProfile =
+      summary.currentPeakKw >= 75 &&
+      summary.steadyLoadShare >= 0.48 &&
+      (building.age > 25 || !building.meter);
+
+    let primary = 'HVAC';
+    if (ventilationHeavy) {
+      primary = 'HVAC';
+    } else if (strongHeatLoop && summary.shiftableKwh < 250000) {
+      primary = 'Heat Reuse';
+    } else if (steadyPeakProfile && summary.peakShavedKw <= 42) {
+      primary = 'Thermal Storage';
+    } else if (strongShiftWindow) {
+      primary = 'Load Controller';
+    } else if (ventilationModerate) {
+      primary = 'HVAC';
+    }
+
+    let secondary = null;
+    if (primary === 'Heat Reuse') {
+      if (steadyPeakProfile && building.hoods < 30) {
+        secondary = 'Thermal Storage';
+      } else if (strongShiftWindow && building.hoods < 24) {
+        secondary = 'Load Controller';
+      } else if (ventilationModerate && building.hoods >= 24) {
+        secondary = 'HVAC';
+      }
+    } else if (primary === 'Load Controller') {
+      if (steadyPeakProfile && !ventilationHeavy) {
+        secondary = 'Thermal Storage';
+      } else if (ventilationHeavy || (ventilationModerate && building.hoods >= 24)) {
+        secondary = 'HVAC';
+      } else if (strongHeatLoop && summary.recoverableHeatMmbtu >= 420) {
+        secondary = 'Heat Reuse';
+      }
+    } else if (primary === 'Thermal Storage') {
+      if (strongHeatLoop && building.hoods < 24) {
+        secondary = 'Heat Reuse';
+      } else if (ventilationModerate && building.hoods >= 24) {
+        secondary = 'HVAC';
+      }
+    } else if (primary === 'HVAC') {
+      if (strongShiftWindow) {
+        secondary = 'Load Controller';
+      } else if (strongHeatLoop && building.hoods < 20) {
+        secondary = 'Heat Reuse';
+      } else if (steadyPeakProfile && building.hoods < 16) {
+        secondary = 'Thermal Storage';
+      }
+    }
+
+    const loadDetail = `${formatEquipmentList(summary.flexDrivers)} can shift about ${(summary.shiftableKwh / 1000).toFixed(0)} MWh/yr into ${scheduleWindowLabel(topFlexType)}.`;
+    const heatDetail = `${formatEquipmentList(summary.heatDrivers)} reject about ${Math.round(summary.recoverableHeatMmbtu).toLocaleString()} MMBtu/yr that can feed a reuse loop.`;
+    const storageDetail = `${formatEquipmentList(summary.heatDrivers)} hold a steady ${summary.currentPeakKw.toFixed(0)} kW peak, so storage can shave demand with minimal schedule disruption.`;
+    const hvacDetail = `${building.hoods} hoods and CO2 near ${building.co2} ppm keep ventilation load high during occupied hours.`;
+
+    let detail = loadDetail;
+    if (primary === 'Heat Reuse') {
+      detail = heatDetail;
+    } else if (primary === 'Thermal Storage') {
+      detail = storageDetail;
+    } else if (primary === 'HVAC') {
+      detail = hvacDetail;
+    }
+
+    if (secondary === 'Load Controller' && primary !== 'Load Controller') {
+      detail += ` Also, ${formatEquipmentList(summary.flexDrivers)} add ${Math.round(summary.shiftableKwh / 1000)} MWh/yr of schedulable lab load.`;
+    } else if (secondary === 'Heat Reuse' && primary !== 'Heat Reuse') {
+      detail += ` Also, process cooling supports about ${Math.round(summary.recoverableHeatMmbtu).toLocaleString()} MMBtu/yr of recoverable heat.`;
+    } else if (secondary === 'Thermal Storage' && primary !== 'Thermal Storage') {
+      detail += ` Also, the flat ${summary.currentPeakKw.toFixed(0)} kW process peak makes storage worthwhile.`;
+    } else if (secondary === 'HVAC' && primary !== 'HVAC') {
+      detail += ` Also, ${building.hoods} hoods and CO2 near ${building.co2} ppm keep ventilation reset on the table.`;
+    }
+
+    return {
+      title: secondary ? `${primary} + ${secondary}` : primary,
+      detail,
+    };
+  }
+
+  if (building.type.includes('Athletic')) {
+    if (building.id === 'AF02') {
+      return {
+        title: 'Heat Reuse',
+        detail: 'Pool and hot-water demand line up best with the lab waste-heat loop.',
+      };
+    }
+    if (building.peak > 1000) {
+      return {
+        title: 'HVAC + Thermal Storage',
+        detail: 'Event-driven spikes make pre-charge and ventilation reset the strongest first move.',
+      };
+    }
+    return {
+      title: 'HVAC',
+      detail: 'Use event schedules to drive setback and airflow reset windows.',
+    };
+  }
+
+  if (building.type.includes('Academic')) {
+    return {
+      title: building.peak > 540 && (building.age > 40 || !building.meter) ? 'HVAC + Thermal Storage' : 'HVAC',
+      detail: building.co2 > 850
+        ? `Room-booking setbacks and CO2 reset fit this building's occupied-hour demand profile.`
+        : building.peak > 540 && (building.age > 40 || !building.meter)
+          ? `Class-hour peaks justify HVAC scheduling first, with storage smoothing the afternoon demand edge.`
+          : `Occupancy-based scheduling is the cleanest first step before deeper retrofits.`,
+    };
+  }
+
+  return {
+    title: building.age > 35 && !building.meter ? 'HVAC + Thermal Storage' : 'HVAC',
+    detail: building.age > 35 && !building.meter
+      ? 'Evening peaks and older controls make setback tuning the first move, with storage reducing the late-day spike.'
+      : building.age > 30
+        ? 'Older envelope and evening occupancy make setback tuning the right first move.'
+        : 'Use schedule-aware HVAC control before larger capital work.',
+  };
+}
+
 function resizeCharts() {
   Object.values(Chart.instances || {}).forEach(chart => chart.resize());
 }
@@ -940,7 +1147,7 @@ function showPage(name, button) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function switchTab(group, name, tab) {
-  const page = document.getElementById('page-'+(group==='lab'?'labs':'dorms'));
+  const page = document.getElementById('page-labs');
   page.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   page.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   if (tab) tab.classList.add('active');
@@ -1111,12 +1318,13 @@ function initHotspotPage() {
   const sorted = [...BUILDINGS].sort((a,b)=>computeRisk(b)-computeRisk(a));
 
   const table = document.getElementById('hotspot-table');
-  table.innerHTML = `<tr><th>#</th><th>Building</th><th>Type</th><th>Annual kWh</th><th>Intensity</th><th>Risk Score</th><th>Risk Level</th><th>Smart Meter</th></tr>`;
+  table.innerHTML = `<tr><th>#</th><th>Building</th><th>Type</th><th>Annual kWh</th><th>Intensity</th><th>Risk Score</th><th>Risk Level</th><th>Smart Meter</th><th>Recommendation</th></tr>`;
   sorted.slice(0,12).forEach((b,i) => {
     const r = computeRisk(b);
     const rl = riskLabel(r);
     const typeColor = {Research:'lab',Residence:'dorm',Academic:'acad',Athletic:'athl'};
     const tc = Object.entries(typeColor).find(([k])=>b.type.includes(k))?.[1] || 'acad';
+    const plan = getInterventionPlan(b);
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td style="color:var(--muted);font-family:'DM Mono',monospace;font-weight:500">${i+1}</td>
@@ -1132,84 +1340,16 @@ function initHotspotPage() {
       </td>
       <td><span class="risk-badge ${rl.cls}">${rl.label}</span></td>
       <td style="text-align:center">${b.meter?'<span style="color:var(--accent);font-size:1rem">✓</span>':'<span style="color:var(--danger);font-size:1rem">✗</span>'}</td>
+      <td>
+        <div style="font-size:0.75rem;color:var(--text);font-weight:600">${plan.title}</div>
+        <div style="font-size:0.64rem;color:var(--muted);line-height:1.45;margin-top:0.2rem">${plan.detail}</div>
+      </td>
     `;
     table.appendChild(tr);
   });
 
   renderHourlyCostWindow();
 
-}
-
-function initAnomalySelector(sortedBuildings) {
-  const select = document.getElementById('anomaly-building-select');
-  if (!select) return;
-  const choices = sortedBuildings.slice(0, 12);
-  select.innerHTML = choices
-    .map(building => {
-      const selected = building.id === 'RL02' ? ' selected' : '';
-      return `<option value="${building.id}"${selected}>${building.id} — ${building.name}</option>`;
-    })
-    .join('');
-  const preferred = choices.find(building => building.id === 'RL02')?.id || choices[0]?.id;
-  if (preferred) select.value = preferred;
-
-  select.onchange = () => {
-    const building = choices.find(item => item.id === select.value);
-    if (building) renderAnomalyChart(building);
-  };
-
-  const initial = choices.find(item => item.id === select.value) || choices[0];
-  if (initial) renderAnomalyChart(initial);
-}
-
-function renderAnomalyChart(building) {
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const { actual, expected } = generateAnomalySeries(building);
-  if (anomalyChart) anomalyChart.destroy();
-  anomalyChart = new Chart(document.getElementById('anomaly-chart'), {
-    type:'line',
-    data:{labels:months,datasets:[
-      {
-        label:`${building.id} Actual`,
-        data:actual,
-        borderColor:'#c0392b',
-        backgroundColor:'rgba(192,57,43,0.08)',
-        fill:true,
-        tension:0.4,
-        borderWidth:2,
-        pointRadius:3,
-        pointBackgroundColor:'#c0392b'
-      },
-      {
-        label:'Expected Baseline',
-        data:expected,
-        borderColor:'#4a9464',
-        borderDash:[5,5],
-        tension:0.4,
-        borderWidth:2,
-        pointRadius:2
-      },
-    ]},
-    options:{
-      ...CD,
-      plugins:{
-        ...CD.plugins,
-        legend:{display:true,labels:{color:'#7a9278',font:{family:"'DM Sans',sans-serif",size:10}}},
-        tooltip:{
-          ...CD.plugins.tooltip,
-          callbacks:{
-            title(items) {
-              return `${building.name} | ${items[0]?.label || ''}`;
-            },
-            label(context) {
-              return `${context.dataset.label}: ${Number(context.raw).toLocaleString()} kWh`;
-            }
-          }
-        }
-      },
-      scales:{x:CD.scales.x,y:{...CD.scales.y,title:{display:true,text:'kWh',color:'#7a9278',font:{size:9}}}}
-    }
-  });
 }
 
 async function renderHourlyCostWindow() {
@@ -1316,36 +1456,37 @@ async function renderHourlyCostWindow() {
 // ══════════════════════════════════════════
 // LABS
 // ══════════════════════════════════════════
-let schedChart, dormChart, peakCostChart;
+let schedChart, deferralChart, peakCostChart;
 function initLabsPage() { updateScheduler(); initFumeHood(); initHeatReuse(); initThermal(); }
 
 function updateScheduler() {
-  const deferPct = 0.35;
-  const discount = 0.45;
-
   const hrs = Array.from({length:24},(_,i)=>`${i}:00`);
-  const LAB_H = [0.82,0.80,0.79,0.78,0.79,0.82,0.88,0.94,1.02,1.08,1.12,1.14,1.10,1.12,1.14,1.13,1.10,1.05,0.98,0.92,0.90,0.88,0.85,0.83];
-  const base = 5470;
-  const optimized = LAB_H.map((m,i) => {
-    let kw = m * base;
-    if(i >= 9 && i <= 21) kw *= (1 - deferPct * 0.4 * discount);
-    if(i < 7 || i > 22) kw *= (1 + deferPct * 0.4 * 0.3);
-    return Math.round(kw);
+  const labs = BUILDINGS.filter(b=>b.type.includes('Research'));
+  const current = Array(24).fill(0);
+  const optimized = Array(24).fill(0);
+  const labShiftables = labs.map(lab => {
+    const summary = getLabEquipmentSummary(lab);
+    summary.current.forEach((value, hour) => { current[hour] += value; });
+    summary.optimized.forEach((value, hour) => { optimized[hour] += value; });
+    return {
+      id: lab.id,
+      shiftableKwh: summary.shiftableKwh,
+    };
   });
+
   if(schedChart) schedChart.destroy();
   schedChart = new Chart(document.getElementById('schedule-chart'), {
     type:'line',
     data:{labels:hrs,datasets:[
-      {label:'Current Profile',data:LAB_H.map(m=>Math.round(m*base)),borderColor:'#c0392b',borderDash:[5,5],fill:false,tension:0.4,borderWidth:2,pointRadius:0},
-      {label:'Optimized (Off-Peak Shifted)',data:optimized,borderColor:'#4a9464',backgroundColor:'rgba(74,148,100,0.09)',fill:true,tension:0.4,borderWidth:2,pointRadius:0},
+      {label:'Current equipment schedule',data:current.map(value => Math.round(value)),borderColor:'#c0392b',borderDash:[5,5],fill:false,tension:0.4,borderWidth:2,pointRadius:0},
+      {label:'Optimized off-peak run plan',data:optimized.map(value => Math.round(value)),borderColor:'#4a9464',backgroundColor:'rgba(74,148,100,0.09)',fill:true,tension:0.4,borderWidth:2,pointRadius:0},
     ]},
-    options:{...CD,plugins:{...CD.plugins,legend:{display:true,labels:{color:'#7a9278',font:{family:"'DM Sans',sans-serif",size:10}}}},scales:{x:CD.scales.x,y:{...CD.scales.y,title:{display:true,text:'kW (aggregate)',color:'#7a9278',font:{size:9}}}}}
+    options:{...CD,plugins:{...CD.plugins,legend:{display:true,labels:{color:'#7a9278',font:{family:"'DM Sans',sans-serif",size:10}}}},scales:{x:CD.scales.x,y:{...CD.scales.y,title:{display:true,text:'kW (schedulable equipment)',color:'#7a9278',font:{size:9}}}}}
   });
-  const labs = BUILDINGS.filter(b=>b.type.includes('Research'));
-  if(dormChart) dormChart.destroy();
-  dormChart = new Chart(document.getElementById('lab-deferral-chart'), {
+  if(deferralChart) deferralChart.destroy();
+  deferralChart = new Chart(document.getElementById('lab-deferral-chart'), {
     type:'bar',
-    data:{labels:labs.map(b=>b.id),datasets:[{label:'Deferrable kWh/yr',data:labs.map(b=>Math.round(b.kwh*deferPct/1000)*1000),backgroundColor:'rgba(74,148,100,0.65)',borderRadius:4}]},
+    data:{labels:labShiftables.map(row=>row.id),datasets:[{label:'Schedulable equipment kWh/yr',data:labShiftables.map(row=>Math.round(row.shiftableKwh/1000)*1000),backgroundColor:'rgba(74,148,100,0.65)',borderRadius:4}]},
     options:{...CD,plugins:{...CD.plugins,legend:{display:false}}}
   });
 }
@@ -1413,100 +1554,69 @@ function initThermal() {
 // ══════════════════════════════════════════
 // DORMS
 // ══════════════════════════════════════════
-function initDormsPage() {
-  const dorms = BUILDINGS
-    .filter(b=>b.type.includes('Residence'))
-    .map(d => ({...d, eui: d.kwh / d.sqft}));
-  const bestDormEui = Math.min(...dorms.map(d => d.eui));
-  const ranked = dorms
-    .map(d => ({...d, score: Math.round((bestDormEui / d.eui) * 100)}))
-    .sort((a,b)=>b.score-a.score);
-  const emojis = ['🥇','🥈','🥉','4️⃣','5️⃣'];
-  const badges = ['Early room pick! 🌟','Dining credits 🍽️','Study lounge priority 📚','Keep pushing! 💪','Room perk pending 🎁'];
-  const colors = ['#c0392b','#4a90c4','#4a9464','#d4893a','#9b59b6'];
-
-  const grid = document.getElementById('dorm-grid');
-  grid.innerHTML = '';
-  ranked.forEach((d,i) => {
-    const div = document.createElement('div');
-    div.className = `dorm-card rank-${i+1}`;
-    div.innerHTML = `<div class="dorm-rank">${emojis[i]}</div><div class="dorm-name">${d.name.split(' ').slice(0,2).join(' ')}</div><div class="dorm-kwh">${(d.kwh/1e6).toFixed(2)}M kWh/yr</div><div class="dorm-score" style="color:${i===0?'var(--accent)':i===1?'#4a90c4':i===2?'var(--warn)':'var(--muted)'}">${d.score}</div><div style="font-size:0.63rem;color:var(--muted);font-family:'DM Mono',monospace">efficiency score</div><div class="dorm-badge" style="margin-top:0.5rem">${badges[i]}</div>`;
-    grid.appendChild(div);
-  });
-
-  new Chart(document.getElementById('behavior-chart'), {
-    type:'line',
-    data:{labels:['Baseline','Week 2','Week 4','Week 6','Week 8','Week 12'],datasets:[
-      {label:'With Leaderboard',data:[100,96,92,88,86,85],borderColor:'#4a9464',backgroundColor:'rgba(74,148,100,0.1)',fill:true,tension:0.4,borderWidth:2,pointRadius:3,pointBackgroundColor:'#4a9464'},
-      {label:'Without (control)',data:[100,99,98,97,97,96],borderColor:'#a8bfa6',borderDash:[5,5],fill:false,tension:0.4,borderWidth:2,pointRadius:2},
-    ]},
-    options:{...CD,plugins:{...CD.plugins,legend:{display:true,labels:{color:'#7a9278',font:{family:"'DM Sans',sans-serif",size:10}}}},scales:{x:CD.scales.x,y:{...CD.scales.y,title:{display:true,text:'% of baseline',color:'#7a9278',font:{size:9}},min:80}}}
-  });
-}
-
 // ══════════════════════════════════════════
 // ROI
 // ══════════════════════════════════════════
 const ROI_DATA = [
-  {rank:1,intervention:'Room Booking + HVAC Integration',category:'Software',capex:180000,savings:520000,payback:0.35,kwh:3900000,buildings:'60 academic',phase:1},
-  {rank:2,intervention:'Fume Hood VAV Sensors',category:'Engineering',capex:650000,savings:1200000,payback:0.54,kwh:9000000,buildings:'10 research labs',phase:1},
-  {rank:3,intervention:'Departmental Chargeback System',category:'Finance',capex:70000,savings:850000,payback:0.08,kwh:6400000,buildings:'All buildings',phase:1},
-  {rank:4,intervention:'CO₂ Demand Ventilation',category:'Engineering',capex:820000,savings:1050000,payback:0.78,kwh:7900000,buildings:'60 academic',phase:1},
-  {rank:5,intervention:'Off-Peak Lab Scheduling + Load Ctrl',category:'Software+Eng',capex:380000,savings:380000,payback:1.0,kwh:2800000,buildings:'10 research labs',phase:2},
-  {rank:6,intervention:'Thermal Energy Storage',category:'Engineering',capex:1500000,savings:447000,payback:3.4,kwh:3300000,buildings:'Research cluster',phase:2},
-  {rank:7,intervention:'Lab Heat Reuse → Pool',category:'Engineering',capex:1200000,savings:305000,payback:3.9,kwh:2300000,buildings:'Labs + Rec Hall',phase:2},
-  {rank:8,intervention:'Dorm Gamification Platform',category:'Software',capex:95000,savings:175000,payback:0.54,kwh:1300000,buildings:'5 dorms',phase:1},
-  {rank:9,intervention:'Solar PPA (Academic Rooftops)',category:'Finance/Eng',capex:0,savings:680000,payback:0.0,kwh:5100000,buildings:'60 academic',phase:2},
-  {rank:10,intervention:'Smart Meter Expansion',category:'Engineering',capex:2800000,savings:520000,payback:5.4,kwh:3900000,buildings:'90 buildings',phase:1},
-  {rank:11,intervention:'Athletic Event-Based HVAC',category:'Software',capex:48000,savings:125000,payback:0.38,kwh:940000,buildings:'3 athletic',phase:1},
-  {rank:12,intervention:'Portable Microgrid Pilot',category:'Engineering',capex:800000,savings:180000,payback:4.4,kwh:1300000,buildings:'2 critical labs',phase:3},
+  {rank:1,intervention:'Peak-Hour Controls + GreenGrid Software',capex:1500000,savings:550000,payback:2.7,kwh:4100000,buildings:'10 research labs',phase:1},
+  {rank:2,intervention:'VAV + Smart Ventilation (Labs)',capex:2000000,savings:1200000,payback:1.7,kwh:9000000,buildings:'10 research labs',phase:1},
+  {rank:3,intervention:'Academic Buildings VAV + CO2 Sensors',capex:1000000,savings:1050000,payback:1.0,kwh:7900000,buildings:'20 academic buildings',phase:1},
+  {rank:4,intervention:'GreenGrid Integration + Data Layer',capex:500000,savings:180000,payback:2.8,kwh:1300000,buildings:'Platform-wide',phase:1},
+  {rank:5,intervention:'Solar PPA (Academic Rooftops)',capex:0,savings:680000,payback:0.0,kwh:5100000,buildings:'Academic rooftops',phase:2},
+  {rank:6,intervention:'Lab Heat Reuse System',capex:2500000,savings:305000,payback:8.2,kwh:2300000,buildings:'Labs + athletic / DHW',phase:2},
+  {rank:7,intervention:'Thermal Energy Storage (Lab Clusters)',capex:4050000,savings:447000,payback:9.1,kwh:3300000,buildings:'3-4 lab clusters',phase:3},
 ];
 
 function initRoiPage() {
   const table = document.getElementById('roi-table');
-  table.innerHTML = `<tr><th>Rank</th><th>Intervention</th><th>Buildings</th><th>CapEx</th><th>Annual Savings</th><th>kWh Saved/yr</th><th>Payback (yrs)</th><th>Phase</th></tr>`;
-  const pCls = (r) => r<=3?'priority-1':r<=6?'priority-2':'priority-3';
+  table.innerHTML = `<tr><th>Priority</th><th>Intervention</th><th>Scope</th><th>CapEx</th><th>Annual Savings</th><th>kWh Saved/yr</th><th>Payback (yrs)</th><th>Phase</th></tr>`;
+  const pCls = (r) => r<=2?'priority-1':r<=5?'priority-2':'priority-3';
   ROI_DATA.forEach(r => {
     const tr = document.createElement('tr');
     tr.className = pCls(r.rank);
-    const payColor = r.payback < 1 ? 'var(--accent3)' : r.payback < 3 ? 'var(--accent)' : r.payback < 4 ? 'var(--warn)' : 'var(--danger)';
+    const payColor = r.payback === 0 ? '#4a90c4' : r.payback < 2 ? 'var(--accent3)' : r.payback < 4 ? 'var(--accent)' : r.payback < 8 ? 'var(--warn)' : 'var(--danger)';
     tr.innerHTML = `
       <td style="font-family:'DM Mono',monospace;font-weight:600;color:var(--muted)">${r.rank}</td>
       <td style="font-weight:600;font-size:0.82rem;color:var(--text)">${r.intervention}</td>
       <td style="font-size:0.74rem;color:var(--muted)">${r.buildings}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:0.74rem">${r.capex===0?'$0 (PPA)':'$'+Math.round(r.capex/1000)+'K'}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:0.74rem;color:var(--accent3);font-weight:600">$${Math.round(r.savings/1000)}K</td>
+      <td style="font-family:'DM Mono',monospace;font-size:0.74rem">${r.capex===0?'$0 (PPA)':'$'+(r.capex/1000000).toFixed(2)+'M'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:0.74rem;color:var(--accent3);font-weight:600">$${(r.savings/1000).toFixed(0)}K</td>
       <td style="font-family:'DM Mono',monospace;font-size:0.74rem">${(r.kwh/1e6).toFixed(1)}M</td>
       <td style="font-family:'DM Mono',monospace;font-size:0.74rem;color:${payColor};font-weight:600">${r.payback===0?'Day 1':r.payback.toFixed(1)}</td>
-      <td style="text-align:center"><span class="tag ${r.phase===1?'tag-phase-1':r.phase===2?'tag-phase-2':'tag-phase-3'}">Yr ${r.phase===1?'1':r.phase===2?'1–2':'3'}</span></td>
+      <td style="text-align:center"><span class="tag ${r.phase===1?'tag-phase-1':r.phase===2?'tag-phase-2':'tag-phase-3'}">Yr ${r.phase}</span></td>
     `;
     table.appendChild(tr);
   });
 
   const years = [0,1,2,3,4,5];
-  const phase1 = ROI_DATA.filter(r=>r.phase===1).reduce((s,r)=>s+r.savings,0);
-  const phase2 = ROI_DATA.filter(r=>r.phase===2).reduce((s,r)=>s+r.savings,0);
-  const phase3 = ROI_DATA.filter(r=>r.phase===3).reduce((s,r)=>s+r.savings,0);
-  const cumSavings = years.map(y => y===0?0:y===1?phase1*0.5:y===2?phase1+phase2*0.5:phase1+phase2+(y-2)*phase3);
+  const cumSavings = years.map(year => {
+    let total = 0;
+    ROI_DATA.forEach(item => {
+      const activeYears = Math.max(0, year - item.phase + 0.5);
+      total += activeYears * item.savings;
+    });
+    return +(total / 1e6).toFixed(2);
+  });
+  const deployedBudget = years.map(year => +(ROI_DATA.filter(item => year >= item.phase).reduce((sum, item) => sum + item.capex, 0) / 1e6).toFixed(2));
 
   new Chart(document.getElementById('cumulative-chart'), {
     type:'line',
     data:{labels:years.map(y=>`Year ${y}`),datasets:[
-      {label:'Cumulative Savings ($M)',data:cumSavings.map(v=>+(v/1e6).toFixed(2)),borderColor:'#4a9464',backgroundColor:'rgba(74,148,100,0.09)',fill:true,tension:0.4,borderWidth:2,pointRadius:4,pointBackgroundColor:'#4a9464'},
-      {label:'Budget Deployed ($M)',data:[0,4.5,8.5,10.5,11.2,12].map(v=>+v.toFixed(2)),borderColor:'#c0392b',borderDash:[5,5],fill:false,tension:0.4,borderWidth:2,pointRadius:3,pointBackgroundColor:'#c0392b'},
+      {label:'Cumulative Savings ($M)',data:cumSavings,borderColor:'#4a9464',backgroundColor:'rgba(74,148,100,0.09)',fill:true,tension:0.4,borderWidth:2,pointRadius:4,pointBackgroundColor:'#4a9464'},
+      {label:'Budget Deployed ($M)',data:deployedBudget,borderColor:'#c0392b',borderDash:[5,5],fill:false,tension:0.4,borderWidth:2,pointRadius:3,pointBackgroundColor:'#c0392b'},
     ]},
     options:{...CD,plugins:{...CD.plugins,legend:{display:true,labels:{color:'#7a9278',font:{family:"'DM Sans',sans-serif",size:10}}}},scales:{x:CD.scales.x,y:{...CD.scales.y,title:{display:true,text:'$M',color:'#7a9278',font:{size:9}}}}}
   });
 
   const tl = document.getElementById('timeline');
   const phases = [
-    {yr:'Year 1',color:'var(--accent3)',dot:'🌱',items:ROI_DATA.filter(r=>r.phase===1).map(r=>r.intervention)},
-    {yr:'Year 1–2',color:'#4a90c4',dot:'🌿',items:ROI_DATA.filter(r=>r.phase===2).map(r=>r.intervention)},
-    {yr:'Year 3',color:'var(--warn)',dot:'🌳',items:ROI_DATA.filter(r=>r.phase===3).map(r=>r.intervention)},
+    {yr:'Year 1',color:'var(--accent3)',dot:'Phase 1',items:ROI_DATA.filter(r=>r.phase===1).map(r=>r.intervention)},
+    {yr:'Year 2',color:'#4a90c4',dot:'Phase 2',items:ROI_DATA.filter(r=>r.phase===2).map(r=>r.intervention)},
+    {yr:'Year 3',color:'var(--warn)',dot:'Phase 3',items:ROI_DATA.filter(r=>r.phase===3).map(r=>r.intervention)},
   ];
   tl.innerHTML = phases.map(p=>`
     <div class="timeline-row">
-      <div class="timeline-year" style="color:${p.color}">${p.dot} ${p.yr}</div>
+      <div class="timeline-year" style="color:${p.color}">${p.dot} | ${p.yr}</div>
       <div class="timeline-chips">
         ${p.items.map(item=>`<span class="timeline-chip">${item}</span>`).join('')}
       </div>
@@ -1522,7 +1632,6 @@ window.addEventListener('load', () => {
   initOverviewCharts();
   initHotspotPage();
   initLabsPage();
-  initDormsPage();
   initRoiPage();
   setTimeout(() => {
     resizeCharts();
