@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MSU NeuralGrid — Campus Energy Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #050810;
+    --surface: #0d1120;
+    --surface2: #131829;
+    --border: #1e2640;
+    --accent: #00e5ff;
+    --accent2: #ff6b35;
+    --accent3: #7fff6b;
+    --danger: #ff3b5c;
+    --warn: #ffb020;
+    --text: #e8eaf6;
+    --muted: #6b7299;
+    --grid: rgba(0,229,255,0.04);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: 
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(5,8,16,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; gap: 2rem;
+    height: 64px;
+  }
+  .logo {
+    font-size: 1.1rem; font-weight: 800; letter-spacing: 0.08em;
+    color: var(--accent); text-transform: uppercase;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .logo-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.5)} }
+  nav { display: flex; gap: 0.25rem; margin-left: auto; }
+  .nav-btn {
+    background: none; border: 1px solid transparent;
+    color: var(--muted); padding: 0.4rem 1rem;
+    font-family: 'Space Mono', monospace; font-size: 0.72rem;
+    cursor: pointer; border-radius: 4px; transition: all 0.2s;
+    letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .nav-btn:hover { color: var(--accent); border-color: var(--border); }
+  .nav-btn.active { color: var(--accent); border-color: var(--accent); background: rgba(0,229,255,0.08); }
+  .status-chip {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-family: 'Space Mono', monospace; font-size: 0.65rem;
+    color: var(--accent3); background: rgba(127,255,107,0.08);
+    border: 1px solid rgba(127,255,107,0.2);
+    padding: 0.25rem 0.75rem; border-radius: 20px;
+  }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent3); animation: pulse 1.5s infinite; }
+
+  /* LAYOUT */
+  .page { display: none; padding: 1.5rem 2rem; position: relative; z-index: 1; }
+  .page.active { display: block; }
+
+  /* KPI ROW */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.25rem;
+    position: relative; overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .kpi-card:hover { border-color: var(--accent); }
+  .kpi-card::after {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  }
+  .kpi-card.c-danger::after { background: var(--danger); }
+  .kpi-card.c-warn::after { background: var(--warn); }
+  .kpi-card.c-good::after { background: var(--accent3); }
+  .kpi-card.c-blue::after { background: var(--accent); }
+  .kpi-label { font-size: 0.65rem; font-family: 'Space Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+  .kpi-value { font-size: 2rem; font-weight: 800; line-height: 1; }
+  .kpi-unit { font-size: 0.75rem; color: var(--muted); margin-left: 0.25rem; font-weight: 400; }
+  .kpi-delta { font-size: 0.72rem; font-family: 'Space Mono', monospace; margin-top: 0.4rem; }
+  .kpi-delta.up { color: var(--danger); }
+  .kpi-delta.down { color: var(--accent3); }
+
+  /* GRID LAYOUTS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .grid-60-40 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  
+  /* CARDS */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.25rem;
+  }
+  .card-title {
+    font-size: 0.65rem; font-family: 'Space Mono', monospace;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em;
+    margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .card-title::before { content: '//'; color: var(--accent); }
+
+  /* HOTSPOT MAP */
+  #campus-map {
+    width: 100%; height: 420px;
+    background: var(--surface2);
+    border-radius: 6px; position: relative; overflow: hidden;
+  }
+  .map-bg {
+    position: absolute; inset: 0;
+    background: 
+      radial-gradient(ellipse 60% 40% at 50% 50%, rgba(0,229,255,0.03) 0%, transparent 70%);
+  }
+  .map-paths { position: absolute; inset: 0; }
+  .building-dot {
+    position: absolute; transform: translate(-50%,-50%);
+    border-radius: 50%; cursor: pointer;
+    transition: all 0.2s; border: 2px solid transparent;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .building-dot:hover { transform: translate(-50%,-50%) scale(1.3); z-index: 10; }
+  .building-dot.selected { border-color: white; z-index: 10; }
+  .building-dot .pulse-ring {
+    position: absolute; border-radius: 50%;
+    border: 2px solid currentColor; opacity: 0;
+    animation: ring 2s infinite;
+  }
+  @keyframes ring { 0%{transform:scale(1);opacity:0.6} 100%{transform:scale(2.2);opacity:0} }
+  .map-legend {
+    position: absolute; bottom: 12px; left: 12px;
+    background: rgba(5,8,16,0.85); border: 1px solid var(--border);
+    border-radius: 6px; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem;
+  }
+  .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; font-family: 'Space Mono', monospace; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .map-tooltip {
+    position: absolute; background: rgba(5,8,16,0.95); border: 1px solid var(--accent);
+    border-radius: 6px; padding: 0.75rem; font-size: 0.75rem;
+    pointer-events: none; display: none; z-index: 20; min-width: 200px;
+    font-family: 'Space Mono', monospace;
+  }
+  .map-tooltip.visible { display: block; }
+  .tt-name { font-weight: 700; color: var(--text); margin-bottom: 0.4rem; font-family: 'Syne', sans-serif; font-size: 0.8rem; }
+  .tt-row { display: flex; justify-content: space-between; gap: 1rem; color: var(--muted); }
+  .tt-val { color: var(--text); }
+
+  /* HOTSPOT TABLE */
+  .hotspot-table { width: 100%; border-collapse: collapse; }
+  .hotspot-table th {
+    font-size: 0.6rem; font-family: 'Space Mono', monospace;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted);
+    padding: 0.5rem 0.75rem; text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .hotspot-table td {
+    padding: 0.6rem 0.75rem; font-size: 0.78rem;
+    border-bottom: 1px solid rgba(30,38,64,0.5);
+  }
+  .hotspot-table tr:hover td { background: rgba(0,229,255,0.03); }
+  .risk-badge {
+    display: inline-block; padding: 0.15rem 0.5rem;
+    border-radius: 3px; font-size: 0.6rem;
+    font-family: 'Space Mono', monospace; text-transform: uppercase;
+    font-weight: 700;
+  }
+  .risk-critical { background: rgba(255,59,92,0.15); color: var(--danger); border: 1px solid rgba(255,59,92,0.3); }
+  .risk-high { background: rgba(255,176,32,0.15); color: var(--warn); border: 1px solid rgba(255,176,32,0.3); }
+  .risk-medium { background: rgba(0,229,255,0.12); color: var(--accent); border: 1px solid rgba(0,229,255,0.25); }
+  .risk-low { background: rgba(127,255,107,0.1); color: var(--accent3); border: 1px solid rgba(127,255,107,0.2); }
+
+  /* BAR / SCORE INDICATORS */
+  .score-bar { display: flex; align-items: center; gap: 0.5rem; }
+  .bar-track { flex: 1; height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+
+  /* ANOMALY FEED */
+  .anomaly-feed { display: flex; flex-direction: column; gap: 0.5rem; max-height: 280px; overflow-y: auto; }
+  .anomaly-item {
+    display: flex; gap: 0.75rem; align-items: flex-start;
+    background: var(--surface2); border-radius: 6px; padding: 0.75rem;
+    border-left: 3px solid;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+  .anomaly-item.critical { border-color: var(--danger); }
+  .anomaly-item.warning { border-color: var(--warn); }
+  .anomaly-item.info { border-color: var(--accent); }
+  .anom-icon { font-size: 1rem; }
+  .anom-body { flex: 1; }
+  .anom-title { font-size: 0.8rem; font-weight: 600; margin-bottom: 0.2rem; }
+  .anom-sub { font-size: 0.68rem; color: var(--muted); font-family: 'Space Mono', monospace; }
+  .anom-time { font-size: 0.62rem; color: var(--muted); font-family: 'Space Mono', monospace; white-space: nowrap; }
+
+  /* CHARTS */
+  .chart-wrap { position: relative; width: 100%; }
+
+  /* MODEL PAGE */
+  .model-section { margin-bottom: 2rem; }
+  .model-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .model-subtitle { font-size: 0.78rem; color: var(--muted); margin-bottom: 1rem; font-family: 'Space Mono', monospace; }
+  .model-output {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1rem;
+    font-family: 'Space Mono', monospace; font-size: 0.72rem;
+    line-height: 1.8; color: var(--text);
+  }
+  .model-highlight { color: var(--accent); font-weight: 700; }
+  .model-danger { color: var(--danger); }
+  .model-good { color: var(--accent3); }
+
+  /* ROI TABLE */
+  .roi-table { width: 100%; border-collapse: collapse; }
+  .roi-table th {
+    font-size: 0.6rem; font-family: 'Space Mono', monospace;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid var(--border);
+  }
+  .roi-table td { padding: 0.65rem 0.75rem; font-size: 0.78rem; border-bottom: 1px solid rgba(30,38,64,0.4); }
+  .roi-table tr:hover td { background: rgba(0,229,255,0.03); }
+  .priority-1 td:first-child { border-left: 2px solid var(--accent3); }
+  .priority-2 td:first-child { border-left: 2px solid var(--accent); }
+  .priority-3 td:first-child { border-left: 2px solid var(--warn); }
+
+  /* DORM GAME */
+  .dorm-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; }
+  .dorm-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1rem; text-align: center;
+    cursor: pointer; transition: all 0.2s;
+    position: relative;
+  }
+  .dorm-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .dorm-card.rank-1 { border-color: var(--accent3); background: rgba(127,255,107,0.05); }
+  .dorm-card.rank-2 { border-color: var(--accent); background: rgba(0,229,255,0.04); }
+  .dorm-card.rank-3 { border-color: var(--warn); background: rgba(255,176,32,0.04); }
+  .dorm-rank { font-size: 1.5rem; margin-bottom: 0.4rem; }
+  .dorm-name { font-size: 0.72rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .dorm-kwh { font-size: 0.65rem; font-family: 'Space Mono', monospace; color: var(--muted); }
+  .dorm-score { font-size: 1.4rem; font-weight: 800; margin: 0.4rem 0; }
+  .dorm-badge { font-size: 0.6rem; background: rgba(0,229,255,0.1); color: var(--accent); padding: 0.15rem 0.4rem; border-radius: 3px; font-family: 'Space Mono', monospace; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* PAGE HEADER */
+  .page-header { margin-bottom: 1.5rem; }
+  .page-header h1 { font-size: 1.6rem; font-weight: 800; }
+  .page-header p { font-size: 0.8rem; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 0.25rem; }
+
+  /* TAG */
+  .tag { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 3px; font-size: 0.6rem; font-family: 'Space Mono', monospace; text-transform: uppercase; }
+  .tag-lab { background: rgba(255,107,53,0.15); color: var(--accent2); }
+  .tag-dorm { background: rgba(0,229,255,0.12); color: var(--accent); }
+  .tag-acad { background: rgba(127,255,107,0.1); color: var(--accent3); }
+  .tag-athl { background: rgba(255,176,32,0.1); color: var(--warn); }
+
+  /* HEAT REUSE FLOW */
+  .flow-diagram {
+    display: flex; align-items: center; justify-content: space-around;
+    gap: 1rem; padding: 1.5rem;
+  }
+  .flow-node {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1rem 1.5rem; text-align: center; min-width: 120px;
+  }
+  .flow-icon { font-size: 2rem; margin-bottom: 0.4rem; }
+  .flow-label { font-size: 0.72rem; font-weight: 600; }
+  .flow-sub { font-size: 0.62rem; color: var(--muted); font-family: 'Space Mono', monospace; }
+  .flow-arrow {
+    flex: 1; height: 2px; background: linear-gradient(to right, var(--accent2), var(--accent));
+    position: relative; max-width: 80px;
+  }
+  .flow-arrow::after {
+    content: '▶'; position: absolute; right: -6px; top: -8px; color: var(--accent); font-size: 0.75rem;
+  }
+  .flow-value {
+    position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+    font-size: 0.6rem; font-family: 'Space Mono', monospace; color: var(--accent3); white-space: nowrap;
+  }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0.25rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); }
+  .tab {
+    padding: 0.5rem 1rem; cursor: pointer; font-size: 0.72rem;
+    font-family: 'Space Mono', monospace; color: var(--muted);
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .tab:hover { color: var(--accent); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* SLIDER CONTROL */
+  .slider-wrap { display: flex; align-items: center; gap: 1rem; margin: 0.5rem 0; }
+  .slider-wrap label { font-size: 0.65rem; font-family: 'Space Mono', monospace; color: var(--muted); width: 160px; }
+  input[type=range] { flex: 1; accent-color: var(--accent); }
+  .slider-val { font-size: 0.72rem; font-family: 'Space Mono', monospace; color: var(--accent); width: 60px; text-align: right; }
+
+  /* RESPONSIVE */
+  @media(max-width: 1100px) {
+    .kpi-row { grid-template-columns: repeat(2,1fr); }
+    .grid-2, .grid-3, .grid-60-40 { grid-template-columns: 1fr; }
+    .dorm-grid { grid-template-columns: repeat(3,1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    MSU NeuralGrid
+  </div>
+  <nav>
+    <button class="nav-btn active" onclick="showPage('overview')">Overview</button>
+    <button class="nav-btn" onclick="showPage('hotspots')">Hotspot Model</button>
+    <button class="nav-btn" onclick="showPage('labs')">Lab Intelligence</button>
+    <button class="nav-btn" onclick="showPage('dorms')">Dorm Leaderboard</button>
+    <button class="nav-btn" onclick="showPage('roi')">ROI Planner</button>
+  </nav>
+  <div class="status-chip">
+    <div class="status-dot"></div>
+    LIVE — 23 buildings monitored
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════ OVERVIEW PAGE ═══════════════════════════════════════ -->
+<div class="page active" id="page-overview">
+  <div class="page-header">
+    <h1>Campus Energy Command</h1>
+    <p>// Real-time intelligence across 120 buildings · 252.5M kWh annual baseline · $33.6M/yr</p>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card c-danger">
+      <div class="kpi-label">Total Annual Usage</div>
+      <div class="kpi-value">252.5<span class="kpi-unit">M kWh</span></div>
+      <div class="kpi-delta up">↑ 18% vs 5yr ago</div>
+    </div>
+    <div class="kpi-card c-warn">
+      <div class="kpi-label">Annual Energy Cost</div>
+      <div class="kpi-value">$33.6<span class="kpi-unit">M/yr</span></div>
+      <div class="kpi-delta up">↑ Peak cost +60% vs off-peak</div>
+    </div>
+    <div class="kpi-card c-blue">
+      <div class="kpi-label">Critical Hotspots</div>
+      <div class="kpi-value">7<span class="kpi-unit">buildings</span></div>
+      <div class="kpi-delta up">↑ Top 6% drive 38% of usage</div>
+    </div>
+    <div class="kpi-card c-good">
+      <div class="kpi-label">Projected Annual Savings</div>
+      <div class="kpi-value">$7.7<span class="kpi-unit">M/yr</span></div>
+      <div class="kpi-delta down">↓ Post full NeuralGrid deploy</div>
+    </div>
+  </div>
+
+  <div class="grid-60-40">
+    <div class="card">
+      <div class="card-title">Campus Hotspot Map — Energy Risk Zones</div>
+      <div id="campus-map">
+        <div class="map-bg"></div>
+        <svg class="map-paths" id="map-svg"></svg>
+        <div id="map-dots"></div>
+        <div class="map-legend">
+          <div style="font-size:0.6rem;font-family:'Space Mono',monospace;color:var(--muted);margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.08em;">Risk Level</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ff3b5c"></div>Critical (&gt;5M kWh/yr)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ffb020"></div>High (3–5M kWh/yr)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#00e5ff"></div>Medium (1.5–3M kWh/yr)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#7fff6b"></div>Low (&lt;1.5M kWh/yr)</div>
+        </div>
+        <div class="map-tooltip" id="map-tooltip"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Live Anomaly Feed</div>
+      <div class="anomaly-feed" id="anomaly-feed"></div>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">Energy by Building Type</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="type-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Smart Meter Coverage</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="meter-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Carbon to Goal</div>
+      <div style="padding: 1rem 0;">
+        <div style="font-size:0.7rem;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:0.5rem;">2025 Baseline → 2035 Target (–40%)</div>
+        <div style="position:relative;height:18px;background:var(--surface2);border-radius:4px;overflow:hidden;margin-bottom:0.75rem;">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:18%;background:linear-gradient(to right,var(--accent3),var(--accent));border-radius:4px;"></div>
+        </div>
+        <div style="font-size:0.65rem;font-family:'Space Mono',monospace;color:var(--muted)">Progress: <span style="color:var(--accent)">18% / 40% reduction needed</span></div>
+        <div style="margin-top:1.2rem;">
+          <div style="font-size:0.65rem;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:0.3rem">NeuralGrid projected impact:</div>
+          <div style="font-size:1.6rem;font-weight:800;color:var(--accent3)">–23%</div>
+          <div style="font-size:0.65rem;color:var(--muted);font-family:'Space Mono',monospace">kWh reduction from full deployment</div>
+          <div style="margin-top:0.75rem;font-size:0.65rem;font-family:'Space Mono',monospace;">
+            <span style="color:var(--accent3)">+15%</span> <span style="color:var(--muted)">from solar PPA offsets</span><br/>
+            <span style="color:var(--accent3)">= 38%</span> <span style="color:var(--muted)">total carbon reduction</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">Typical Day — Energy Demand by Building Type (kW aggregate)</div>
+    <div class="chart-wrap" style="height:200px"><canvas id="hourly-chart"></canvas></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ HOTSPOT PAGE ═══════════════════════════════════════ -->
+<div class="page" id="page-hotspots">
+  <div class="page-header">
+    <h1>Hotspot Detection Model</h1>
+    <p>// Composite risk scoring across energy intensity, inefficiency index, and anomaly frequency</p>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:1rem;">
+    <div class="card">
+      <div class="card-title">Model: Energy Intensity Score (kWh/sqft/yr)</div>
+      <div class="model-subtitle" style="font-size:0.68rem;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:0.75rem;">
+        Score = (annual_kwh / sqft) · type_weight · age_factor · meter_penalty
+      </div>
+      <div class="chart-wrap" style="height:280px"><canvas id="intensity-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Model: Composite Risk Score (0–100)</div>
+      <div class="model-subtitle" style="font-size:0.68rem;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:0.75rem;">
+        Risk = 0.4·intensity + 0.3·kwh_rank + 0.2·age_factor + 0.1·anomaly_freq
+      </div>
+      <div class="chart-wrap" style="height:280px"><canvas id="risk-chart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Hotspot Priority Rankings — Top Buildings Requiring Intervention</div>
+    <table class="hotspot-table" id="hotspot-table"></table>
+  </div>
+
+  <div class="grid-2" style="margin-top:1rem;">
+    <div class="card">
+      <div class="card-title">Peak vs Off-Peak Usage Ratio by Building</div>
+      <div class="chart-wrap" style="height:260px"><canvas id="peak-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Anomaly Detection — Simulated kWh vs Expected</div>
+      <div class="chart-wrap" style="height:260px"><canvas id="anomaly-chart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ LABS PAGE ═══════════════════════════════════════ -->
+<div class="page" id="page-labs">
+  <div class="page-header">
+    <h1>Lab Intelligence System</h1>
+    <p>// Scheduling optimization, fume hood modeling, heat reuse routing</p>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card c-danger">
+      <div class="kpi-label">Lab Annual Usage</div>
+      <div class="kpi-value">47.9<span class="kpi-unit">M kWh</span></div>
+      <div class="kpi-delta up">↑ 19% of total campus</div>
+    </div>
+    <div class="kpi-card c-warn">
+      <div class="kpi-label">Avg kWh/sqft (Labs)</div>
+      <div class="kpi-value">157<span class="kpi-unit">kWh/sqft</span></div>
+      <div class="kpi-delta up">↑ 4.9× campus avg</div>
+    </div>
+    <div class="kpi-card c-blue">
+      <div class="kpi-label">Fume Hoods (Total)</div>
+      <div class="kpi-value">299<span class="kpi-unit">units</span></div>
+      <div class="kpi-delta up">↑ ~$2,000/yr ea. unoptimized</div>
+    </div>
+    <div class="kpi-card c-good">
+      <div class="kpi-label">Potential Lab Savings</div>
+      <div class="kpi-value">$4.1<span class="kpi-unit">M/yr</span></div>
+      <div class="kpi-delta down">↓ VAV + scheduling + heat reuse</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('lab','schedule')">Off-Peak Scheduler</div>
+    <div class="tab" onclick="switchTab('lab','fumehood')">Fume Hood Model</div>
+    <div class="tab" onclick="switchTab('lab','heatreuse')">Heat Reuse Routing</div>
+    <div class="tab" onclick="switchTab('lab','thermal')">Thermal Storage</div>
+  </div>
+
+  <div class="tab-content active" id="lab-schedule">
+    <div class="grid-60-40">
+      <div class="card">
+        <div class="card-title">Deferrable Load Scheduling — Cost Optimization</div>
+        <div style="margin-bottom:1rem;">
+          <div class="slider-wrap">
+            <label>% Equipment Deferrable</label>
+            <input type="range" min="10" max="60" value="35" id="defer-slider" oninput="updateScheduler()"/>
+            <span class="slider-val" id="defer-val">35%</span>
+          </div>
+          <div class="slider-wrap">
+            <label>Off-Peak Price Discount</label>
+            <input type="range" min="20" max="60" value="45" id="discount-slider" oninput="updateScheduler()"/>
+            <span class="slider-val" id="discount-val">45%</span>
+          </div>
+        </div>
+        <div class="chart-wrap" style="height:240px"><canvas id="schedule-chart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Scheduler Output</div>
+        <div class="model-output" id="schedule-output">Calculating...</div>
+        <div style="margin-top:1rem;">
+          <div class="card-title" style="margin-bottom:0.5rem;">Per-Lab Deferral Capacity</div>
+          <div class="chart-wrap" style="height:180px"><canvas id="lab-deferral-chart"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="lab-fumehood">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Fume Hood VAV Savings Model</div>
+        <div class="model-subtitle" style="font-size:0.67rem;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:0.75rem;">
+          Savings = hoods × (1 - sash_reduction) × power_per_hood × hours × electricity_rate
+        </div>
+        <div class="chart-wrap" style="height:260px"><canvas id="fumehood-chart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Sash Position Analysis — Energy vs Safety Model</div>
+        <div style="padding:1rem 0;">
+          <div style="font-size:0.72rem;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:1rem;">
+            Fume hoods at 100% exhaust when unoccupied = $598/hood/yr wasted
+          </div>
+          <div id="hood-cards" style="display:flex;flex-direction:column;gap:0.5rem;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="lab-heatreuse">
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-title">Heat Reuse Flow — Labs → Athletic Facilities</div>
+      <div class="flow-diagram" id="heat-flow"></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Monthly Heat Available vs Athletic Demand</div>
+        <div class="chart-wrap" style="height:240px"><canvas id="heat-chart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Heat Reuse Financial Model</div>
+        <div class="model-output" id="heat-output"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="lab-thermal">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Thermal Storage — Charge/Discharge Cycle</div>
+        <div class="chart-wrap" style="height:260px"><canvas id="thermal-chart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Thermal Storage Economic Model</div>
+        <div class="model-output" id="thermal-output"></div>
+        <div class="chart-wrap" style="height:180px;margin-top:1rem;"><canvas id="thermal-savings-chart"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ DORMS PAGE ═══════════════════════════════════════ -->
+<div class="page" id="page-dorms">
+  <div class="page-header">
+    <h1>Residence Hall Leaderboard</h1>
+    <p>// Gamified energy competition — weekly standings · perks for top performers</p>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card c-blue">
+      <div class="kpi-label">Total Dorm Usage</div>
+      <div class="kpi-value">9.7<span class="kpi-unit">M kWh</span></div>
+      <div class="kpi-delta">5 residence halls tracked</div>
+    </div>
+    <div class="kpi-card c-good">
+      <div class="kpi-label">Weekly Leader</div>
+      <div class="kpi-value" style="font-size:1.1rem;">North Campus</div>
+      <div class="kpi-delta down">↓ 12% vs last week</div>
+    </div>
+    <div class="kpi-card c-warn">
+      <div class="kpi-label">Most Improved</div>
+      <div class="kpi-value" style="font-size:1.1rem;">West Towers</div>
+      <div class="kpi-delta down">↓ 8% vs last week</div>
+    </div>
+    <div class="kpi-card c-danger">
+      <div class="kpi-label">Needs Attention</div>
+      <div class="kpi-value" style="font-size:1.1rem;">South Village</div>
+      <div class="kpi-delta up">↑ 6% vs last week</div>
+    </div>
+  </div>
+
+  <div class="dorm-grid" id="dorm-grid" style="margin-bottom:1.5rem;"></div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Weekly Energy Trend — All Halls</div>
+      <div class="chart-wrap" style="height:250px"><canvas id="dorm-trend-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Evening Spike Detection (6pm–11pm)</div>
+      <div class="chart-wrap" style="height:250px"><canvas id="dorm-spike-chart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1rem;">
+    <div class="card-title">Behavioral Model — Competition Effect on Energy Reduction</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;padding-top:0.5rem;">
+      <div>
+        <div class="chart-wrap" style="height:200px"><canvas id="behavior-chart"></canvas></div>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:0.72rem;line-height:2;color:var(--muted);">
+        <div style="color:var(--text);font-weight:700;margin-bottom:0.5rem;">Competition Effect Model</div>
+        Baseline reduction (smart meter alone): <span style="color:var(--accent)">3–5%</span><br/>
+        Leaderboard visibility effect: <span style="color:var(--accent)">+5–8%</span><br/>
+        Perks incentive multiplier: <span style="color:var(--accent)">+2–4%</span><br/>
+        <span style="color:var(--border)">─────────────────────────</span><br/>
+        Total projected reduction: <span style="color:var(--accent3)">10–17%</span><br/>
+        <br/>
+        At 9.7M kWh baseline:<br/>
+        Savings range: <span style="color:var(--accent3)">970K – 1.65M kWh/yr</span><br/>
+        Dollar value: <span style="color:var(--accent3)">$129K – $220K/yr</span><br/>
+        <br/>
+        <span style="color:var(--warn)">⚡ Weekend evenings = peak risk window</span><br/>
+        Smart meter alerts sent when usage<br/>
+        exceeds 120% of hall average.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ ROI PAGE ═══════════════════════════════════════ -->
+<div class="page" id="page-roi">
+  <div class="page-header">
+    <h1>ROI Planner & Budget Allocator</h1>
+    <p>// $12M budget · 5-year horizon · 40% carbon reduction target by 2035</p>
+  </div>
+
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">Investment Portfolio — All Interventions Ranked by ROI</div>
+    <table class="roi-table" id="roi-table"></table>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">3-Year Cumulative Savings vs Investment</div>
+      <div class="chart-wrap" style="height:250px"><canvas id="cumulative-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Budget Allocation by Category</div>
+      <div class="chart-wrap" style="height:250px"><canvas id="budget-chart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1rem;">
+    <div class="card-title">Phased Deployment Timeline</div>
+    <div id="timeline" style="padding-top:0.5rem;"></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════════════════════
+const BUILDINGS = [
+  {id:"RL01",name:"Biomedical Research Ctr",type:"Research Lab",sqft:42000,kwh:6100000,lat:40.7965,lon:-77.8625,age:12,meter:true,floors:5,hoods:48,co2:890,occ:0.72,peak:1850},
+  {id:"RL02",name:"Chemistry & Materials Lab",type:"Research Lab",sqft:38000,kwh:5800000,lat:40.7952,lon:-77.8601,age:28,meter:true,floors:4,hoods:62,co2:1050,occ:0.68,peak:1720},
+  {id:"RL03",name:"Physics & Nuclear Lab",type:"Research Lab",sqft:29000,kwh:5200000,lat:40.7978,lon:-77.8590,age:45,meter:false,floors:3,hoods:28,co2:780,occ:0.55,peak:1580},
+  {id:"RL04",name:"Agricultural Biotech Lab",type:"Research Lab",sqft:35000,kwh:4900000,lat:40.7940,lon:-77.8645,age:18,meter:true,floors:3,hoods:35,co2:720,occ:0.61,peak:1420},
+  {id:"RL05",name:"Environmental Science Lab",type:"Research Lab",sqft:22000,kwh:4300000,lat:40.7989,lon:-77.8612,age:33,meter:false,floors:3,hoods:22,co2:850,occ:0.58,peak:1280},
+  {id:"RL06",name:"Computational Neuro Lab",type:"Research Lab",sqft:18000,kwh:3900000,lat:40.7933,lon:-77.8580,age:8,meter:true,floors:2,hoods:8,co2:620,occ:0.78,peak:1150},
+  {id:"RL07",name:"Genomics Research Ctr",type:"Research Lab",sqft:31000,kwh:5500000,lat:40.7971,lon:-77.8630,age:5,meter:true,floors:4,hoods:42,co2:940,occ:0.82,peak:1650},
+  {id:"RL08",name:"Mechanical Eng Lab",type:"Research Lab",sqft:27000,kwh:4600000,lat:40.7960,lon:-77.8570,age:22,meter:false,floors:3,hoods:18,co2:680,occ:0.64,peak:1380},
+  {id:"RL09",name:"Food Science Lab",type:"Research Lab",sqft:19000,kwh:3700000,lat:40.7945,lon:-77.8655,age:15,meter:true,floors:2,hoods:24,co2:760,occ:0.59,peak:1100},
+  {id:"RL10",name:"Electrical Systems Lab",type:"Research Lab",sqft:24000,kwh:4100000,lat:40.7956,lon:-77.8595,age:30,meter:false,floors:3,hoods:12,co2:710,occ:0.62,peak:1230},
+  {id:"RH01",name:"East Residence Hall",type:"Residence Hall",sqft:85000,kwh:2100000,lat:40.8002,lon:-77.8560,age:35,meter:false,floors:8,hoods:0,co2:950,occ:0.88,peak:620},
+  {id:"RH02",name:"West Towers",type:"Residence Hall",sqft:92000,kwh:2350000,lat:40.7998,lon:-77.8680,age:22,meter:true,floors:10,hoods:0,co2:1020,occ:0.91,peak:690},
+  {id:"RH03",name:"North Campus Suites",type:"Residence Hall",sqft:78000,kwh:1950000,lat:40.8015,lon:-77.8610,age:8,meter:true,floors:7,hoods:0,co2:890,occ:0.86,peak:575},
+  {id:"RH04",name:"South Village Hall",type:"Residence Hall",sqft:65000,kwh:1720000,lat:40.7925,lon:-77.8635,age:48,meter:false,floors:6,hoods:0,co2:1080,occ:0.84,peak:510},
+  {id:"RH05",name:"Graduate Housing",type:"Residence Hall",sqft:55000,kwh:1580000,lat:40.7918,lon:-77.8590,age:15,meter:true,floors:5,hoods:0,co2:820,occ:0.79,peak:465},
+  {id:"AB01",name:"Sparks Hall (Liberal Arts)",type:"Academic",sqft:62000,kwh:1450000,lat:40.7970,lon:-77.8615,age:55,meter:false,floors:5,hoods:0,co2:780,occ:0.68,peak:430},
+  {id:"AB02",name:"Willard Bldg (Business)",type:"Academic",sqft:75000,kwh:1680000,lat:40.7962,lon:-77.8598,age:42,meter:true,floors:6,hoods:0,co2:850,occ:0.72,peak:498},
+  {id:"AB03",name:"Hammond Bldg (Eng)",type:"Academic",sqft:88000,kwh:1920000,lat:40.7955,lon:-77.8582,age:38,meter:true,floors:7,hoods:0,co2:920,occ:0.75,peak:568},
+  {id:"AB04",name:"Pattee Library",type:"Academic",sqft:120000,kwh:2100000,lat:40.7980,lon:-77.8627,age:60,meter:false,floors:8,hoods:0,co2:700,occ:0.55,peak:622},
+  {id:"AB05",name:"Thomas Bldg (Science)",type:"Academic",sqft:54000,kwh:1320000,lat:40.7944,lon:-77.8643,age:52,meter:false,floors:4,hoods:0,co2:810,occ:0.65,peak:391},
+  {id:"AF01",name:"Beaver Stadium Complex",type:"Athletic",sqft:350000,kwh:3800000,lat:40.8120,lon:-77.8560,age:20,meter:true,floors:4,hoods:0,co2:450,occ:0.15,peak:1120},
+  {id:"AF02",name:"Rec Hall & Natatorium",type:"Athletic",sqft:180000,kwh:2900000,lat:40.7935,lon:-77.8570,age:35,meter:true,floors:3,hoods:0,co2:520,occ:0.42,peak:855},
+  {id:"AF03",name:"Pegula Ice Arena",type:"Athletic",sqft:95000,kwh:2200000,lat:40.8005,lon:-77.8555,age:12,meter:false,floors:3,hoods:0,co2:480,occ:0.28,peak:648},
+];
+
+const CHART_DEFAULTS = {
+  plugins:{ legend:{labels:{color:'#6b7299',font:{family:"'Space Mono',monospace",size:10}}}, tooltip:{backgroundColor:'#0d1120',borderColor:'#1e2640',borderWidth:1,titleColor:'#e8eaf6',bodyColor:'#6b7299',titleFont:{family:"'Syne',sans-serif"}}},
+  scales:{x:{ticks:{color:'#6b7299',font:{family:"'Space Mono',monospace",size:9}},grid:{color:'rgba(30,38,64,0.6)'}},y:{ticks:{color:'#6b7299',font:{family:"'Space Mono',monospace",size:9}},grid:{color:'rgba(30,38,64,0.6)'}}}
+};
+
+// ════════════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  event.target.classList.add('active');
+}
+function switchTab(group, name) {
+  document.querySelectorAll(`#page-${group==='lab'?'labs':'dorms'} .tab`).forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll(`#page-${group==='lab'?'labs':'dorms'} .tab-content`).forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById(`${group}-${name}`).classList.add('active');
+}
+
+// ════════════════════════════════════════════════════════════
+// HOTSPOT MODEL
+// ════════════════════════════════════════════════════════════
+function computeRisk(b) {
+  const intensity = b.kwh / b.sqft; // kWh/sqft
+  const typeWeight = {Research:1.4,Lab:1.4,Residence:0.6,Academic:0.5,Athletic:0.8};
+  const tw = Object.entries(typeWeight).find(([k])=>b.type.includes(k))?.[1] || 1;
+  const ageFactor = Math.min(1.0, b.age/50);
+  const meterPenalty = b.meter ? 0 : 15;
+  const intensityScore = Math.min(100, (intensity/200)*100*tw);
+  const kwhRank = Math.min(100, (b.kwh/6200000)*100);
+  const anomalyFreq = b.co2 > 900 ? 80 : b.co2 > 700 ? 50 : 30;
+  const risk = 0.4*intensityScore + 0.3*kwhRank + 0.2*(ageFactor*100) + 0.1*anomalyFreq + meterPenalty;
+  return Math.min(100, Math.round(risk));
+}
+
+function riskLabel(score) {
+  if(score>=75) return {label:'Critical',cls:'risk-critical'};
+  if(score>=55) return {label:'High',cls:'risk-high'};
+  if(score>=35) return {label:'Medium',cls:'risk-medium'};
+  return {label:'Low',cls:'risk-low'};
+}
+
+// ════════════════════════════════════════════════════════════
+// CAMPUS MAP
+// ════════════════════════════════════════════════════════════
+function initMap() {
+  const map = document.getElementById('campus-map');
+  const dots = document.getElementById('map-dots');
+  const tooltip = document.getElementById('map-tooltip');
+  const W = map.offsetWidth, H = map.offsetHeight;
+
+  // normalize lat/lon to pixel coords
+  const lats = BUILDINGS.map(b=>b.lat), lons = BUILDINGS.map(b=>b.lon);
+  const minLat=Math.min(...lats), maxLat=Math.max(...lats);
+  const minLon=Math.min(...lons), maxLon=Math.max(...lons);
+
+  const pad = 60;
+  function toX(lon) { return pad + (lon-minLon)/(maxLon-minLon)*(W-pad*2); }
+  function toY(lat) { return H-pad - (lat-minLat)/(maxLat-minLat)*(H-pad*2); }
+
+  // color by usage
+  function dotColor(kwh) {
+    if(kwh>=5000000) return '#ff3b5c';
+    if(kwh>=3000000) return '#ffb020';
+    if(kwh>=1500000) return '#00e5ff';
+    return '#7fff6b';
+  }
+  function dotSize(kwh) {
+    return 8 + (kwh/6200000)*22;
+  }
+
+  // draw SVG campus outline (simplified quad shape)
+  const svg = document.getElementById('map-svg');
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  // draw a simple campus grid
+  for(let i=0;i<8;i++){
+    const x = pad+i*(W-pad*2)/7;
+    const line1 = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line1.setAttribute('x1',x); line1.setAttribute('y1',pad);
+    line1.setAttribute('x2',x); line1.setAttribute('y2',H-pad);
+    line1.setAttribute('stroke','rgba(30,38,64,0.5)'); line1.setAttribute('stroke-width','1');
+    svg.appendChild(line1);
+  }
+  for(let i=0;i<6;i++){
+    const y = pad+i*(H-pad*2)/5;
+    const line2 = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line2.setAttribute('x1',pad); line2.setAttribute('y1',y);
+    line2.setAttribute('x2',W-pad); line2.setAttribute('y2',y);
+    line2.setAttribute('stroke','rgba(30,38,64,0.5)'); line2.setAttribute('stroke-width','1');
+    svg.appendChild(line2);
+  }
+  // campus label
+  const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+  txt.setAttribute('x',W/2); txt.setAttribute('y',20);
+  txt.setAttribute('text-anchor','middle'); txt.setAttribute('fill','rgba(107,114,153,0.5)');
+  txt.setAttribute('font-size','9'); txt.setAttribute('font-family','Space Mono,monospace');
+  txt.textContent = 'PENNSYLVANIA STATE UNIVERSITY — UNIVERSITY PARK CAMPUS';
+  svg.appendChild(txt);
+
+  BUILDINGS.forEach(b => {
+    const x = toX(b.lon), y = toY(b.lat);
+    const color = dotColor(b.kwh);
+    const size = dotSize(b.kwh);
+    const risk = computeRisk(b);
+
+    const dot = document.createElement('div');
+    dot.className = 'building-dot';
+    dot.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:${color}22;border:2px solid ${color};color:${color}`;
+
+    if(risk >= 60) {
+      const ring = document.createElement('div');
+      ring.className = 'pulse-ring';
+      ring.style.cssText = `width:${size+8}px;height:${size+8}px;top:-6px;left:-6px;`;
+      dot.appendChild(ring);
+    }
+
+    dot.addEventListener('mouseenter', (e) => {
+      const rl = riskLabel(risk);
+      tooltip.innerHTML = `
+        <div class="tt-name">${b.name}</div>
+        <div class="tt-row"><span>${b.type}</span><span class="tt-val"><span class="risk-badge ${rl.cls}">${rl.label}</span></span></div>
+        <div class="tt-row"><span>Annual kWh</span><span class="tt-val">${(b.kwh/1e6).toFixed(1)}M</span></div>
+        <div class="tt-row"><span>Intensity</span><span class="tt-val">${Math.round(b.kwh/b.sqft)} kWh/sqft</span></div>
+        <div class="tt-row"><span>Risk Score</span><span class="tt-val">${risk}/100</span></div>
+        <div class="tt-row"><span>Smart Meter</span><span class="tt-val">${b.meter?'✓ Yes':'✗ No'}</span></div>
+        <div class="tt-row"><span>Building Age</span><span class="tt-val">${b.age} yrs</span></div>
+      `;
+      tooltip.classList.add('visible');
+    });
+    dot.addEventListener('mousemove', (e) => {
+      const rect = map.getBoundingClientRect();
+      let tx = e.clientX-rect.left+10, ty = e.clientY-rect.top+10;
+      if(tx+210 > W) tx = e.clientX-rect.left-220;
+      tooltip.style.left = tx+'px'; tooltip.style.top = ty+'px';
+    });
+    dot.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
+    dots.appendChild(dot);
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+// OVERVIEW CHARTS
+// ════════════════════════════════════════════════════════════
+function initOverviewCharts() {
+  // Energy by type donut
+  new Chart(document.getElementById('type-chart'), {
+    type:'doughnut',
+    data:{
+      labels:['Research Labs','Academic Bldgs','Athletic Facilities','Residence Halls'],
+      datasets:[{data:[47900000,8470000,8900000,9700000],backgroundColor:['#ff3b5c','#7fff6b','#ffb020','#00e5ff'],borderColor:'#0d1120',borderWidth:3,hoverOffset:8}]
+    },
+    options:{...CHART_DEFAULTS,plugins:{...CHART_DEFAULTS.plugins,legend:{position:'bottom',labels:{color:'#6b7299',font:{family:"'Space Mono',monospace",size:9},padding:8}}}}
+  });
+
+  // Smart meter coverage
+  new Chart(document.getElementById('meter-chart'), {
+    type:'doughnut',
+    data:{
+      labels:['Smart Meters Installed','Standard Meters (Monthly)'],
+      datasets:[{data:[25,75],backgroundColor:['#00e5ff','#1e2640'],borderColor:'#0d1120',borderWidth:3}]
+    },
+    options:{...CHART_DEFAULTS,plugins:{...CHART_DEFAULTS.plugins,legend:{position:'bottom',labels:{color:'#6b7299',font:{family:"'Space Mono',monospace",size:9},padding:8}}}}
+  });
+
+  // Hourly demand
+  const hrs = Array.from({length:24},(_,i)=>`${i}:00`);
+  const LAB_H = [0.82,0.80,0.79,0.78,0.79,0.82,0.88,0.94,1.02,1.08,1.12,1.14,1.10,1.12,1.14,1.13,1.10,1.05,0.98,0.92,0.90,0.88,0.85,0.83];
+  const DORM_H = [0.55,0.50,0.48,0.47,0.48,0.52,0.65,0.80,0.88,0.82,0.75,0.72,0.75,0.72,0.70,0.72,0.80,0.95,1.15,1.25,1.20,1.10,0.90,0.70];
+  const ACAD_H = [0.30,0.28,0.27,0.27,0.28,0.35,0.55,0.78,0.92,1.05,1.10,1.08,1.05,1.10,1.12,1.08,0.95,0.80,0.65,0.50,0.42,0.38,0.35,0.32];
+  const ATHL_H = [0.25,0.22,0.22,0.22,0.22,0.25,0.35,0.50,0.65,0.70,0.72,0.72,0.70,0.72,0.75,0.80,0.88,0.95,1.05,1.10,1.05,0.85,0.55,0.35];
+
+  const labBase=5470, dormBase=1110, acadBase=966, athlBase=973;
+  new Chart(document.getElementById('hourly-chart'), {
+    type:'line',
+    data:{
+      labels:hrs,
+      datasets:[
+        {label:'Research Labs',data:LAB_H.map(m=>Math.round(m*labBase)),borderColor:'#ff3b5c',backgroundColor:'rgba(255,59,92,0.08)',fill:true,tension:0.4,borderWidth:2,pointRadius:0},
+        {label:'Residence Halls',data:DORM_H.map(m=>Math.round(m*dormBase)),borderColor:'#00e5ff',backgroundColor:'rgba(0,229,255,0.06)',fill:true,tension:0.4,borderWidth:2,pointRadius:0},
+        {label:'Academic',data:ACAD_H.map(m=>Math.round(m*acadBase)),borderColor:'#7fff6b',backgroundColor:'rgba(127,255,107,0.05)',fill:true,tension:0.4,borderWidth:2,pointRadius:0},
+        {label:'Athletic',data:ATHL_H.map(m=>Math.round(m*athlBase)),borderColor:'#ffb020',backgroundColor:'rgba(255,176,32,0.05)',fill:true,tension:0.4,borderWidth:2,pointRadius:0},
+      ]
+    },
+    options:{...CHART_DEFAULTS,scales:{x:{...CHART_DEFAULTS.scales.x,ticks:{...CHART_DEFAULTS.scales.x.ticks,maxTicksLimit:8}},y:{...CHART_DEFAULTS.scales.y,title:{display:true,text:'kW',color:'#6b7299',font:{size:9,family:"'Space Mono',monospace"}}}}}
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+// ANOMALY FEED
+// ════════════════════════════════════════════════════════════
+const ANOMALIES = [
+  {type:'critical',icon:'🔴',title:'RL02 — Extreme overnight load',sub:'3.2× baseline at 02:14 AM — fume hoods running at 100% unoccupied',time:'2m ago'},
+  {type:'critical',icon:'🔴',title:'RL07 — Peak demand spike',sub:'1,890kW peak demand (14.8% over rated capacity)',time:'11m ago'},
+  {type:'warning',icon:'🟡',title:'RH04 — Evening surge detected',sub:'South Village Hall: 47% above avg consumption 9–11pm',time:'34m ago'},
+  {type:'warning',icon:'🟡',title:'RL01 — CO₂ anomaly',sub:'Room 312 CO₂ at 1,420ppm — HVAC setback overridden manually',time:'1h ago'},
+  {type:'info',icon:'🔵',title:'AB03 — Setback opportunity',sub:'Hammond Bldg no bookings 2pm–5pm today — auto-setback initiated',time:'2h ago'},
+  {type:'info',icon:'🔵',title:'AF02 — Heat capture active',sub:'Rec Hall pool receiving 2.3 MMBtu/hr from lab heat exchange loop',time:'3h ago'},
+  {type:'warning',icon:'🟡',title:'RL03 — Meter gap',sub:'Physics Lab has no smart meter — energy estimated from substation data',time:'4h ago'},
+];
+function initAnomalyFeed() {
+  const feed = document.getElementById('anomaly-feed');
+  ANOMALIES.forEach((a,i) => {
+    setTimeout(() => {
+      const div = document.createElement('div');
+      div.className = `anomaly-item ${a.type}`;
+      div.innerHTML = `<div class="anom-icon">${a.icon}</div><div class="anom-body"><div class="anom-title">${a.title}</div><div class="anom-sub">${a.sub}</div></div><div class="anom-time">${a.time}</div>`;
+      feed.prepend(div);
+    }, i*200);
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+// HOTSPOT PAGE
+// ════════════════════════════════════════════════════════════
+function initHotspotPage() {
+  const sorted = [...BUILDINGS].sort((a,b)=>computeRisk(b)-computeRisk(a));
+
+  // Intensity bar chart - top 12
+  const top12 = sorted.slice(0,12);
+  new Chart(document.getElementById('intensity-chart'), {
+    type:'bar',
+    data:{
+      labels:top12.map(b=>b.id),
+      datasets:[{
+        label:'kWh/sqft/yr',
+        data:top12.map(b=>Math.round(b.kwh/b.sqft)),
+        backgroundColor:top12.map(b=>{
+          const r=computeRisk(b);
+          return r>=75?'rgba(255,59,92,0.7)':r>=55?'rgba(255,176,32,0.7)':r>=35?'rgba(0,229,255,0.7)':'rgba(127,255,107,0.7)';
+        }),
+        borderRadius:3,
+      }]
+    },
+    options:{...CHART_DEFAULTS,indexAxis:'y',plugins:{...CHART_DEFAULTS.plugins,legend:{display:false}},scales:{x:{...CHART_DEFAULTS.scales.x},y:{...CHART_DEFAULTS.scales.y,ticks:{...CHART_DEFAULTS.scales.y.ticks,font:{family:"'Space Mono',monospace",size:9}}}}}
+  });
+
+  // Risk score chart
+  new Chart(document.getElementById('risk-chart'), {
+    type:'bar',
+    data:{
+      labels:top12.map(b=>b.id),
+      datasets:[{
+        label:'Risk Score',
+        data:top12.map(b=>computeRisk(b)),
+        backgroundColor:top12.map(b=>{
+          const r=computeRisk(b);
+          return r>=75?'rgba(255,59,92,0.8)':r>=55?'rgba(255,176,32,0.8)':r>=35?'rgba(0,229,255,0.8)':'rgba(127,255,107,0.8)';
+        }),
+        borderRadius:3,
+      }]
+    },
+    options:{...CHART_DEFAULTS,indexAxis:'y',plugins:{...CHART_DEFAULTS.plugins,legend:{display:false}},scales:{x:{...CHART_DEFAULTS.scales.x,max:100},y:{...CHART_DEFAULTS.scales.y,ticks:{...CHART_DEFAULTS.scales.y.ticks,font:{family:"'Space Mono',monospace",size:9}}}}}
+  });
+
+  // Table
+  const table = document.getElementById('hotspot-table');
+  table.innerHTML = `<tr>
+    <th>#</th><th>Building</th><th>Type</th><th>Annual kWh</th><th>Intensity</th><th>Risk Score</th><th>Risk Level</th><th>Smart Meter</th><th>Primary Action</th>
+  </tr>`;
+  sorted.slice(0,12).forEach((b,i) => {
+    const r = computeRisk(b);
+    const rl = riskLabel(r);
+    const typeColor = {Research:'lab',Residence:'dorm',Academic:'acad',Athletic:'athl'};
+    const tc = Object.entries(typeColor).find(([k])=>b.type.includes(k))?.[1] || 'acad';
+    const actions = {Research:'VAV + Load Schedule',Residence:'Gamification + Meter','Academic':'HVAC Setback',Athletic:'Event-Based HVAC'};
+    const act = Object.entries(actions).find(([k])=>b.type.includes(k))?.[1] || 'Smart Meter';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--muted);font-family:'Space Mono',monospace">${i+1}</td>
+      <td style="font-weight:600">${b.name}</td>
+      <td><span class="tag tag-${tc}">${b.type}</span></td>
+      <td style="font-family:'Space Mono',monospace">${(b.kwh/1e6).toFixed(1)}M</td>
+      <td style="font-family:'Space Mono',monospace">${Math.round(b.kwh/b.sqft)} kWh/ft²</td>
+      <td>
+        <div class="score-bar">
+          <div class="bar-track"><div class="bar-fill" style="width:${r}%;background:${r>=75?'var(--danger)':r>=55?'var(--warn)':r>=35?'var(--accent)':'var(--accent3)'}"></div></div>
+          <span style="font-family:'Space Mono',monospace;font-size:0.7rem">${r}</span>
+        </div>
+      </td>
+      <td><span class="risk-badge ${rl.cls}">${rl.label}</span></td>
+      <td style="text-align:center">${b.meter?'<span style="color:var(--accent3)">✓</span>':'<span style="color:var(--danger)">✗</span>'}</td>
+      <td style="font-size:0.72rem;color:var(--muted)">${act}</td>
+    `;
+    table.appendChild(tr);
+  });
+
+  // Peak ratio chart
+  const labBuildings = BUILDINGS.filter(b=>b.type.includes('Research'));
+  new Chart(document.getElementById('peak-chart'), {
+    type:'bar',
+    data:{
+      labels:labBuildings.map(b=>b.id),
+      datasets:[
+        {label:'Peak kW',data:labBuildings.map(b=>b.peak),backgroundColor:'rgba(255,59,92,0.7)',borderRadius:3},
+        {label:'Avg kW (est)',data:labBuildings.map(b=>Math.round(b.kwh/8760)),backgroundColor:'rgba(0,229,255,0.5)',borderRadius:3}
+      ]
+    },
+    options:{...CHART_DEFAULTS,plugins:{...CHART_DEFAULTS.plugins,legend:{display:true,labels:{color:'#6b7299',font:{family:"'Space Mono',monospace",size:9}}}}}
+  });
+
+  // Anomaly detection
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const rl02_actual = [460000,440000,485000,475000,500000,515000,550000,540000,480000,470000,450000,435000];
+  const rl02_expected = [440000,420000,460000,450000,470000,480000,510000,500000,450000,440000,425000,415000];
+  new Chart(document.getElementById('anomaly-chart'), {
+    type:'line',
+    data:{
+      labels:months,
+      datasets:[
+        {label:'RL02 Actual',data:rl02_actual,borderColor:'#ff3b5c',backgroundColor:'rgba(255,59,92,0.1)',fill:true,tension:0.4,borderWidth:2,pointRadius:3,pointBackgroundColor:'#ff3b5c'},
+        {label:'Expected Baseline',data:rl02_expected,borderColor:'#00e5ff',backgroundColor:'transparent',borderDash:[5,5],tension:0.4,borderWidth:2,pointRadius:2},
+      ]
+    },
+    options:{...CHART_DEFAULTS,plugins:{...CHART_DEFAULTS.plugins,legend:{display:true,labels:{color:'#6b7299',font:{family:"'Space Mono',monospace",size:9}}}},scales:{x:CHART_DEFAULTS.scales.x,y:{...CHART_DEFAULTS.scales.y,title:{display:true,text:'kWh',color:'#6b7299',font:{size:9,family:"'Space Mono',monospace"}}}}}
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+// LABS PAGE
+// ════════════════════════════════════════════════════════════
+let schedChart, dormChart;
+function initLabsPage() {
+  updateScheduler();
+  initFumeHood();
+  initHeatReuse();
+  initThermal();
+}
+
+function updateScheduler() {
+  const deferPct = parseInt(document.getElementById('defer-slider').value)/100;
+  const discount = parseInt(document.getElementById('discount-slider').value)/100;
+  document.getElementById('defer-val').textContent = Math.round(deferPct*100)+'%';
+  document.getElementById('discount-val').textContent = Math.round(discount*100)+'%';
+
+  const totalLabKwh = 47900000;
+  const deferrable = totalLabKwh * deferPct;
+  const avgRate = 0.133;
+  const peakKwh = deferrable * 0.4; // 40% happens in peak hours normally
+  const savings = peakKwh * avgRate * discount;
+
+  document.getElementById('schedule-output').innerHTML = `
+<span style="color:var(--muted)">// SCHEDULER MODEL OUTPUT</span>
+Total lab baseline:     <span class="model-highlight">47.9M kWh/yr</span>
+Deferrable load:        <span class="model-highlight">${(deferrable/1e6).toFixed(1)}M kWh (${Math.round(deferPct*100)}%)</span>
+Peak-shifted kWh:       <span class="model-highlight">${(peakKwh/1e6).toFixed(1)}M kWh</span>
+Off-peak discount:      <span class="model-highlight">${Math.round(discount*100)}%</span>
+Avg electricity rate:   <span class="model-highlight">$0.133/kWh</span>
+
+Annual cost savings:    <span class="model-good">$${(savings/1000).toFixed(0)}K/yr</span>
+5-year savings:         <span class="model-good">$${(savings*5/1e6).toFixed(2)}M</span>
+
+Load controller cost:   <span class="model-danger">~$380K (one-time)</span>
+Payback period:         <span class="model-highlight">${savings > 0 ? (380000/savings).toFixed(1) : '—'} years</span>
+
+<span style="color:var(--muted)">No experiment downtime — only
+pre-flagged deferrable equipment
+is ever scheduled.</span>
+  `;
+
+  const hrs = Array.from({length:24},(_,i)=>`${i}:00`);
+  const LAB_H = [0.82,0.80,0.79,0.78,0.79,0.82,0.88,0.94,1.02,1.08,1.12,1.14,1.10,1.12,1.14,1.13,1.10,1.05,0.98,0.92,0.90,0.88,0.85,0.83];
+  const base = 5470;
+  const optimized = LAB_H.map((m,i) => {
+    let kw = m * base;
+    if(i >= 9 && i <= 21) kw *= (1 - deferPct * 0.4 * discount);
+    if(i < 7 || i > 22) kw *= (1 + deferPct * 0.4 * 0.3);
+    return Math.round(kw);
+  });
+
+  if(schedChart) schedChart.destroy();
+  schedChart = new Chart(document.getElementById('schedule-chart'), {
+    type:'line',
+    data:{
+      labels:hrs,
+      datasets:[
+        {label:'Current Profile',data:LAB_H.map(m=>Math.round(m*base)),borderColor:'#ff3b5c',borderDash:[5,5],fill:false,tension:0.4,borderWidth:2,pointRadius:0},
+        {label:'Optimized (Off-Peak Shifted)',data:optimized,borderColor:'#00e5ff',backgroundColor:'rgba(0,229,255,0.08)',fill:true,tension:0.4,borderWidth:2,pointRadius:0},
+      ]
+    },
+    options:{...CHART_DEFAULTS,plugins:{...CHART_DEFAULTS.plugins,legend:{display:true,labels:{color:'#6b7299',font:{family:"'Space Mono',monospace",size:9}}}},scales:{...CHART_DEFAULTS.scales,y:{...CHART_DEFAULTS.scales.y,title:{display:true,text:'kW (aggregate all labs)',color:'#6b7299',font:{size:9}}}}}
+  });
+
+  // per-lab deferral
+  const labs = BUILDINGS.filter(b=>b.type.includes('Research'));
+  if(dormChart) dormChart.destroy();
+  dormChart = new Chart(document.getElementById('lab-deferral-chart'), {
+    type:'bar',
+    data:{
+      labels:labs.map(b=>b.id),
+      datasets:[{
+        label:'Deferrable kWh/yr',
+        data:labs.map(b=>Math.round(b.kwh*deferPct/1000)*1000),
+        backgroundColor:'rgba(0,229,255,0.6)',
+        borderRadius:3
+      }]
+    },
+    options:{...CHART_DEFAULTS,plugins:{...CHART_DEFAULTS.plugins,legend:{display:false}}}
+  });
+}
+
+function initFumeHood() {
+  const labs = BUILDINGS.filter(b=>b.hoods>0);
+  const powerPerHood = 1200; // watts
+  const hoursPerYear = 8760;
+  const rate = 0.133;
+  const unoccupiedFraction = 0.45;
+  const sashReductions = [0.3,0.4,0.5,0.6,0.7];
+
+  new Chart(document.getElementById('fumehood-chart'), {
+    type:'bar',
+    data:{
+      labels:labs.map(b=>b.name.split(' ').slice(0,2).join(' ')),
+      datasets:[
+        {label:'Current Annual Cost ($K)',data:labs.map(b=>Math.round(b.hoods*powerPerHood/1000*hoursPerYear*rate/1000)),backgroundColor:'rgba(255,59,92,0.7)',borderRadius:3},
+        {label:'With VAV Sensors ($K)',data:labs.map(b=>Math.round(b.hoods*powerPerHood/1000*hoursPerYear*rate*0.55/1000)),backgroundColor:'rgba(0,229,255,0.6)',borderRadius:3},
+      ]
+    },
+    options:{...CHART_DEFAULTS,plugins:{...CHART_DEFAULTS.plugins,legend:{display:true,labels:{color:'#6b7299',font:{family:"'Space Mono',monospace",size:9}}}},scales:{...CHART_DEFAULTS.scales,y:{...CHART_DEFAULTS.scales.y,title:{display:true,text:'$K/yr',color:'#6b7299',font:{size:9}}}}}
+  });
+
+  const hoodCards = document.getElementById('hood-cards');
+  [
+    {lab:'RL02 — Chemistry',hoods:62,co2:1050,status:'critical',note:'Hoods running 24/7 — sash avg 65%'},
+    {lab:'RL07 — Genomics',hoods:42,co2:940,status:'high',note:'Night occupancy low — schedule VAV'},
+    {lab:'RL04 — Agri Biotech',hoods:35,co2:720,status:'medium',note:'Sash compliance good — optimize further'},
+    {lab:'RL01 — Biomedical',hoods:48,co2:890,status:'high',note:'Weekend unoccupied overrides detected'},
+  ].forEach(h => {
+    const sav = Math.round(h.hoods * powerPerHood/1000 * hoursPerYear * rate * 0.45 / 1000);
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0.75rem;background:var(--surface2);border-radius:4px;font-size:0.72rem;';
+    div.innerHTML = `
+      <div>
+        <div style="font-weight:600">${h.lab}</div>
+        <div style="color:var(--muted);font-family:'Space Mono',monospace;font-size:0.62rem">${h.note}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="color:var(--accent3);font-weight:700;font-family:'Space Mono',monospace">$${sav}K/yr saved</div>
+        <div style="color:var(--muted);font-size:0.62rem">${h.hoods} hoods</div>
+      </div>
+    `;
+    hoodCards.appendChild(div);
+  });
+}
+
+function initHeatReuse() {
+  const flow = document.getElementById('heat-flow');
+  flow.innerHTML = `
+    <div class="flow-node" style="border-color:var(--danger)">
+      <div class="flow-icon">🔬</div>
+      <div class="flow-label">Research Labs</div>
+      <div class="flow-sub">47.9M kWh/yr<br/>Avg 32°C waste heat</div>
+    </div>
+    <div class="flow-arrow" style="position:relative">
+      <div class="flow-value">Heat Exchanger<br/>$1.2M install</div>
+    </div>
+    <div class="flow-node" style="border-color:var(--accent)">
+      <div class="flow-icon">♨️</div>
+      <div class="flow-label">NeuralGrid Hub</div>
+      <div class="flow-sub">Routes 8,200 MMBtu/yr<br/>per real-time demand</div>
+    </div>
+    <div class="flow-arrow" style="position:relative">
+      <div class="flow-value">Insulated<br/>water loop</div>
+    </div>
+    <div class="flow-node" style="border-color:var(--accent3)">
+      <div class="flow-icon">🏊</div>
+      <div class="flow-label">Rec Hall Pool</div>
+      <div class="flow-sub">Saves $220K/yr<br/>gas + electric</div>
+    </div>
+    <div class="flow-arrow" style="position:relative">
+      <div class="flow-value"> </div>
+    </div>
+    <div class="flow-node" style="border-color:var(--warn)">
+      <div class="flow-icon">🚿</div>
+      <div class="flow-label">Hot Water (DHW)</div>
+      <div class="flow-sub">Campus-wide<br/>Saves $85K/yr</div>
+    </div>
+  `;
+
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const heatAvail = [720,680,750,720,700,650,620,640,700,720,710,730];
+  const poolDemand = [680,650,700,640,580,510,480,490,560,620,660,700];
+  new Chart(document.getElementById('heat-chart'), {
+    type:'bar',
+    data:{
+      labels:months,
+      datasets:[
+        {label:'Heat Available (MMBtu)',data:heatAvail,backgroundColor:'rgba(255,59,92,0.6)',borderRadius:3},
+        {label:'Athletic Demand (MMBtu)',data:poolDemand,backgroundColor:'rgba(0,229,255,0.5)',borderRadius:3},
+      ]
+    },
+    options:{...CHART_DEFAULTS,plugins:{...CHART_DEFAULTS.plugins,legend:{display:true,labels:{color:'#6b7299',font:{family:"'Space Mono',monospace",size:9}}}}}
+  });
+
+  document.getElementById('heat-output').innerHTML = `
+<span style="color:var(--muted)">// HEAT REUSE MODEL</span>
+Lab equipment waste heat:   <span class="model-highlight">~8,640 MMBtu/yr</span>
+Usable (after exchange):    <span class="model-highlight">~7,600 MMBtu/yr</span>
+Athletic facility demand:   <span class="model-highlight">~7,200 MMBtu/yr</span>
+
+Pool heating offset:        <span class="model-good">$220,000/yr</span>
+DHW preheat offset:         <span class="model-good">$85,000/yr</span>
+<span style="color:var(--border)">─────────────────────────────</span>
+Total annual savings:       <span class="model-good">$305,000/yr</span>
+
+Infrastructure cost:        <span class="model-danger">$1,200,000</span>
+Payback period:             <span class="model-highlight">3.9 years</span>
+20-year NPV (7%):           <span class="model-good">$2.0M</span>
+
+<span style="color:var(--muted)">NeuralGrid monitors heat
+supply vs demand in real-time
+to route efficiently.</span>
+  `;
+}
+
+function initThermal() {
+  const hrs = Array.from({length:24},(_,i)=>`${i}:00`);
+  const charge = [0,0,0,150,280,350,400,380,350,300,250,200,150,100,80,60,40,20,0,0,0,0,0,0];
+  const discharge = [30,20,10,0,0,0,0,80,200,350,450,490,500,480,460,400,300,200,100,50,40,30,30,30];
+  const savings = hrs.map((_,i) => {
+    const isOnPeak = i >= 10 && i <= 19;
+    return isOnPeak ? discharge[i] * 0.133 * 0.6 : 0;
+  });
+
+  new Chart(document.getElementById('thermal-chart'), {
+    type:'bar',
+    data:{
+      labels:hrs,
+      datasets:[
+        {label:'Charging (kW, off-peak)',data:charge,backgroundColor:'rgba(0,229,255,0.6)',borderRadius:3},
+        {label:'Discharging (kW, peak avoidance)',data:discharge,backgroundColor:'rgba(127,255,107,0.6)',borderRadius:3},
+      ]
+    },
+    options:{...CHART_DEFAULTS,plugins:{...CHART_DEFAULTS.plugins,legend:{display:true,labels:{color:'#6b7299',font:{family:"'Space Mono',monospace",size:9}}}}}
+  });
+
+  document.getElementById('thermal-output').innerHTML = `
+<span style="color:var(--muted)">// THERMAL STORAGE MODEL</span>
+Tank capacity:          <span class="model-highlight">4,000 ton-hours</span>
+Off-peak charge rate:   <span class="model-highlight">350 tons @ $0.075/kWh</span>
+Peak discharge rate:    <span class="model-highlight">490 tons @ $0.133/kWh</span>
+Daily ΔP savings:       <span class="model-good">$1,840/day</span>
+
+Annual savings:         <span class="model-good">$447,000/yr</span>
+Tank + equip cost:      <span class="model-danger">$1,500,000</span>
+Payback:                <span class="model-highlight">3.4 years</span>
+
+Carbon benefit:
+  Charging off-peak = <span class="model-good">lower carbon grid</span>
+  Grid intensity night: <span class="model-good">280 gCO₂/kWh</span>
+  Grid intensity peak:  <span class="model-danger">420 gCO₂/kWh</span>
+  Annual CO₂ reduction: <span class="model-good">~410 metric tons</span>
+  `;
+
+  new Chart(document.getElementById('thermal-savings-chart'), {
+    type:'bar',
+    data:{
+      labels:hrs,
+      datasets:[{
+        label:'Peak Cost Avoided ($)',
+        data:savings.map(s=>Math.round(s*10)/10),
+        backgroundColor:'rgba(127,255,107,0.6)',
+        borderRadius:2
+      }]
+    },
+    options:{...CHART_DEFAULTS,plugins:{...CHART_DEFAULTS.plugins,legend:{display:false}},scales:{...CHART_DEFAULTS.scales,y:{...CHART_DEFAULTS.scales.y,title:{display:true,text:'$/hr avoided',color:'#6b7299',font:{size:9}}}}}
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+// DORMS PAGE
+// ════════════════════════════════════════════════════════════
+function initDormsPage() {
+  const dorms = BUILDINGS.filter(b=>b.type.includes('Residence'));
+  const scores = dorms.map(d => {
+    const perCapita = d.kwh / (d.sqft / 200); // est residents
+    const normalized = 100 - Math.round((perCapita / 800) * 100);
+    return Math.max(0, Math.min(100, normalized));
+  });
+
+  const ranked = dorms.map((d,i) => ({...d, score:scores[i]})).sort((a,b)=>b.score-a.score);
+  const emojis = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+  const badges = ['Early room pick!','Dining credits','Study lounge priority','Keep pushing!','Room perk pending'];
+
+  const grid = document.getElementById('dorm-grid');
+  ranked.forEach((d,i) => {
+    const div = document.createElement('div');
+    div.className = `dorm-card rank-${i+1}`;
+    div.innerHTML = `
+      <div class="dorm-rank">${emojis[i]}</div>
+      <div class="dorm-name">${d.name.split(' ').slice(0,2).join(' ')}</div>
+      <div class="dorm-kwh">${(d.kwh/1e6).toFixed(2)}M kWh/yr</div>
+      <div class="dorm-score" style="color:${i===0?'var(--accent3)':i===1?'var(--accent)':i===2?'var(--warn)':'var(--muted)'}">${d.score}</div>
+      <div style="font-size:0.6rem;color:var(--muted);font-family:'Space Mono',monospace">efficiency score</div>
+      <div class="dorm-badge" style="margin-top:0.5rem">${badges[i]}</div>
+    `;
+    grid.appendChild(div);
+  });
+
+  const weeks = ['Wk 1','Wk 2','Wk 3','Wk 4','Wk 5','Wk 6'];
+  const colors = ['#ff3b5c','#00e5ff','#7fff6b','#ffb020','#a78bfa'];
+  new Chart(document.getElementById('dorm-trend-chart'), {
+    type:'line',
+    data:{
+      labels:weeks,
+      datasets:ranked.map((d,i) => ({
+        label:d.name.split(' ').slice(0,2).join(' '),
+        data:[d.kwh/52, d.kwh/52*0.98, d.kwh/52*(i===2?0.94:0.96), d.kwh/52*(i===2?0.90:0.95), d.kwh/52*(i===2?0.87:0.94), d.kwh/52*(i===2?0.85:0.93)].map(v=>Math.round(v)),
+        borderColor:colors[i],fill:false,tension:0.4,borderWidth:2,pointRadius:3,pointBackgroundColor:colors[i]
+      }))
+    },
+    options:{...CHART_DEFAULTS,plugins:{...CHART_DEFAULTS.plugins,legend:{display:true,position:'bottom',labels:{color:'#6b7299',font:{family:"'Space Mono',monospace",size:8},padding:6}}}}
+  });
+
+  const eveningHrs = ['6pm','7pm','8pm','9pm','10pm','11pm'];
+  new Chart(document.getElementById('dorm-spike-chart'), {
+    type:'bar',
+    data:{
+      labels:eveningHrs,
+      datasets:ranked.map((d,i) => ({
+        label:d.name.split(' ').slice(0,2).join(' '),
+        data:[0.80,0.95,1.15,1.25,1.20,1.10].map(m=>Math.round(m*d.kwh/8760*(i===3?1.3:i===1?1.1:1)*6)),
+        backgroundColor:colors[i]+'99',
+        borderRadius:3
+      }))
+    },
+    options:{...CHART_DEFAULTS,plugins:{...CHART_DEFAULTS.plugins,legend:{display:true,position:'bottom',labels:{color:'#6b7299',font:{family:"'Space Mono',monospace",size:8},padding:4}}}}
+  });
+
+  new Chart(document.getElementById('behavior-chart'), {
+    type:'line',
+    data:{
+      labels:['Baseline','Week 2','Week 4','Week 6','Week 8','Week 12'],
+      datasets:[
+        {label:'With Leaderboard',data:[100,96,92,88,86,85],borderColor:'#00e5ff',fill:false,tension:0.4,borderWidth:2,pointRadius:3,pointBackgroundColor:'#00e5ff'},
+        {label:'Without (control)',data:[100,99,98,97,97,96],borderColor:'#6b7299',borderDash:[5,5],fill:false,tension:0.4,borderWidth:2,pointRadius:2},
+      ]
+    },
+    options:{...CHART_DEFAULTS,plugins:{...CHART_DEFAULTS.plugins,legend:{display:true,labels:{color:'#6b7299',font:{family:"'Space Mono',monospace",size:9}}}},scales:{...CHART_DEFAULTS.scales,y:{...CHART_DEFAULTS.scales.y,title:{display:true,text:'% of baseline',color:'#6b7299',font:{size:9}},min:80}}}
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+// ROI PAGE
+// ════════════════════════════════════════════════════════════
+const ROI_DATA = [
+  {rank:1,intervention:'Room Booking + HVAC Integration',category:'Software',capex:180000,savings:520000,payback:0.35,kwh:3900000,buildings:'60 academic',phase:1},
+  {rank:2,intervention:'Fume Hood VAV Sensors',category:'Engineering',capex:650000,savings:1200000,payback:0.54,kwh:9000000,buildings:'10 research labs',phase:1},
+  {rank:3,intervention:'Departmental Chargeback System',category:'Finance',capex:70000,savings:850000,payback:0.08,kwh:6400000,buildings:'All buildings',phase:1},
+  {rank:4,intervention:'CO₂ Demand Ventilation',category:'Engineering',capex:820000,savings:1050000,payback:0.78,kwh:7900000,buildings:'60 academic',phase:1},
+  {rank:5,intervention:'Off-Peak Lab Scheduling + Load Ctrl',category:'Software+Eng',capex:380000,savings:380000,payback:1.0,kwh:2800000,buildings:'10 research labs',phase:2},
+  {rank:6,intervention:'Thermal Energy Storage',category:'Engineering',capex:1500000,savings:447000,payback:3.4,kwh:3300000,buildings:'Research cluster',phase:2},
+  {rank:7,intervention:'Lab Heat Reuse → Pool',category:'Engineering',capex:1200000,savings:305000,payback:3.9,kwh:2300000,buildings:'Labs + Rec Hall',phase:2},
+  {rank:8,intervention:'Dorm Gamification Platform',category:'Software',capex:95000,savings:175000,payback:0.54,kwh:1300000,buildings:'5 dorms',phase:1},
+  {rank:9,intervention:'Solar PPA (Academic Rooftops)',category:'Finance/Eng',capex:0,savings:680000,payback:0.0,kwh:5100000,buildings:'60 academic',phase:2},
+  {rank:10,intervention:'Smart Meter Expansion',category:'Engineering',capex:2800000,savings:520000,payback:5.4,kwh:3900000,buildings:'90 buildings',phase:1},
+  {rank:11,intervention:'Athletic Event-Based HVAC',category:'Software',capex:48000,savings:125000,payback:0.38,kwh:940000,buildings:'3 athletic',phase:1},
+  {rank:12,intervention:'Portable Microgrid Pilot',category:'Engineering',capex:800000,savings:180000,payback:4.4,kwh:1300000,buildings:'2 critical labs',phase:3},
+];
+
+function initRoiPage() {
+  const table = document.getElementById('roi-table');
+  table.innerHTML = `<tr>
+    <th>Rank</th><th>Intervention</th><th>Category</th><th>Buildings</th><th>CapEx</th><th>Annual Savings</th><th>kWh Saved/yr</th><th>Payback (yrs)</th><th>Phase</th>
+  </tr>`;
+
+  const priorityCls = (r) => r<=3?'priority-1':r<=6?'priority-2':'priority-3';
+
+  ROI_DATA.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.className = priorityCls(r.rank);
+    const catColor = r.category.includes('Software')?'var(--accent)':r.category.includes('Finance')?'var(--accent3)':'var(--warn)';
+    const payColor = r.payback < 1 ? 'var(--accent3)' : r.payback < 3 ? 'var(--accent)' : r.payback < 4 ? 'var(--warn)' : 'var(--danger)';
+    tr.innerHTML = `
+      <td style="font-family:'Space Mono',monospace;font-weight:700;color:var(--muted)">${r.rank}</td>
+      <td style="font-weight:600;font-size:0.8rem">${r.intervention}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:0.65rem;color:${catColor}">${r.category}</td>
+      <td style="font-size:0.7rem;color:var(--muted)">${r.buildings}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:0.72rem">${r.capex===0?'$0 (PPA)':'$'+Math.round(r.capex/1000)+'K'}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--accent3)">$${Math.round(r.savings/1000)}K</td>
+      <td style="font-family:'Space Mono',monospace;font-size:0.72rem">${(r.kwh/1e6).toFixed(1)}M</td>
+      <td style="font-family:'Space Mono',monospace;font-size:0.72rem;color:${payColor}">${r.payback===0?'Day 1':r.payback.toFixed(1)}</td>
+      <td style="text-align:center"><span class="tag" style="${r.phase===1?'background:rgba(127,255,107,0.12);color:var(--accent3)':r.phase===2?'background:rgba(0,229,255,0.1);color:var(--accent)':'background:rgba(255,176,32,0.1);color:var(--warn)'}">Yr ${r.phase===1?'1':r.phase===2?'1–2':'3'}</span></td>
+    `;
+    table.appendChild(tr);
+  });
+
+  // Cumulative savings
+  const years = [0,1,2,3,4,5];
+  const phase1 = ROI_DATA.filter(r=>r.phase===1).reduce((s,r)=>s+r.savings,0);
+  const phase2 = ROI_DATA.filter(r=>r.phase===2).reduce((s,r)=>s+r.savings,0);
+  const phase3 = ROI_DATA.filter(r=>r.phase===3).reduce((s,r)=>s+r.savings,0);
+  const totalCapex = ROI_DATA.reduce((s,r)=>s+r.capex,0);
+
+  const cumSavings = years.map(y => {
+    if(y===0) return 0;
+    if(y===1) return phase1*0.5;
+    if(y===2) return phase1 + phase2*0.5;
+    return phase1 + phase2 + (y-2)*phase3;
+  });
+
+  new Chart(document.getElementById('cumulative-chart'), {
+    type:'line',
+    data:{
+      labels:years.map(y=>`Year ${y}`),
+      datasets:[
+        {label:'Cumulative Savings ($M)',data:cumSavings.map(v=>+(v/1e6).toFixed(2)),borderColor:'#7fff6b',backgroundColor:'rgba(127,255,107,0.08)',fill:true,tension:0.4,borderWidth:2,pointRadius:4,pointBackgroundColor:'#7fff6b'},
+        {label:'Budget Deployed ($M)',data:[0,4.5,8.5,10.5,11.2,12].map(v=>+v.toFixed(2)),borderColor:'#ff3b5c',borderDash:[5,5],fill:false,tension:0.4,borderWidth:2,pointRadius:3,pointBackgroundColor:'#ff3b5c'},
+      ]
+    },
+    options:{...CHART_DEFAULTS,plugins:{...CHART_DEFAULTS.plugins,legend:{display:true,labels:{color:'#6b7299',font:{family:"'Space Mono',monospace",size:9}}}},scales:{...CHART_DEFAULTS.scales,y:{...CHART_DEFAULTS.scales.y,title:{display:true,text:'$M',color:'#6b7299',font:{size:9}}}}}
+  });
+
+  // Budget donut
+  const byCat = {Software:0,Engineering:0,Finance:0};
+  ROI_DATA.forEach(r=>{
+    if(r.category.includes('Software')) byCat.Software+=r.capex;
+    else if(r.category.includes('Finance')) byCat.Finance+=r.capex;
+    else byCat.Engineering+=r.capex;
+  });
+  new Chart(document.getElementById('budget-chart'), {
+    type:'doughnut',
+    data:{
+      labels:['Engineering','Software','Finance/Contingency'],
+      datasets:[{data:[byCat.Engineering/1000,byCat.Software/1000,(12000000-totalCapex)/1000],backgroundColor:['#ffb020','#00e5ff','#7fff6b'],borderColor:'#0d1120',borderWidth:3}]
+    },
+    options:{...CHART_DEFAULTS,plugins:{...CHART_DEFAULTS.plugins,legend:{position:'bottom',labels:{color:'#6b7299',font:{family:"'Space Mono',monospace",size:9},padding:8}}}}
+  });
+
+  // Timeline
+  const tl = document.getElementById('timeline');
+  const phases = [
+    {yr:'Year 1',color:'var(--accent3)',items:ROI_DATA.filter(r=>r.phase===1).map(r=>r.intervention)},
+    {yr:'Year 1–2',color:'var(--accent)',items:ROI_DATA.filter(r=>r.phase===2).map(r=>r.intervention)},
+    {yr:'Year 3',color:'var(--warn)',items:ROI_DATA.filter(r=>r.phase===3).map(r=>r.intervention)},
+  ];
+  tl.innerHTML = phases.map(p=>`
+    <div style="display:flex;gap:1rem;margin-bottom:1rem;align-items:flex-start;">
+      <div style="width:80px;min-width:80px;font-family:'Space Mono',monospace;font-size:0.65rem;font-weight:700;color:${p.color};padding-top:0.1rem">${p.yr}</div>
+      <div style="flex:1;display:flex;flex-wrap:wrap;gap:0.4rem">
+        ${p.items.map(item=>`<span style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:4px;padding:0.25rem 0.6rem;font-size:0.68rem">${item}</span>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  initMap();
+  initAnomalyFeed();
+  initOverviewCharts();
+  initHotspotPage();
+  initLabsPage();
+  initDormsPage();
+  initRoiPage();
+});
+</script>
+</body>
+</html>
