@@ -131,6 +131,23 @@ The score blends:
 
 This is the first insight question GreenGrid answers: "Which buildings deserve attention first?"
 
+Representative snippet from the live logic:
+
+```js
+function computeRisk(b) {
+  const intensity = b.kwh / b.sqft;
+  const typeWeight = {Research:1.4,Lab:1.4,Residence:0.6,Academic:0.5,Athletic:0.8};
+  const tw = Object.entries(typeWeight).find(([k])=>b.type.includes(k))?.[1] || 1;
+  const ageFactor = Math.min(1.0, b.age/50);
+  const meterPenalty = b.meter ? 0 : 15;
+  const intensityScore = Math.min(100, (intensity/200)*100*tw);
+  const kwhRank = Math.min(100, (b.kwh/6200000)*100);
+  const anomalyFreq = b.co2 > 900 ? 80 : b.co2 > 700 ? 50 : 30;
+  const risk = 0.4*intensityScore + 0.3*kwhRank + 0.2*(ageFactor*100) + 0.1*anomalyFreq + meterPenalty;
+  return Math.min(100, Math.round(risk));
+}
+```
+
 ### 3. Research-lab equipment model
 
 Labs use a deeper model than non-lab buildings.
@@ -174,6 +191,40 @@ Each equipment type includes modeled assumptions like:
 
 This is the bridge between the raw equipment assumptions and the recommendations users see in the UI.
 
+Representative snippet from the live logic:
+
+```js
+function getLabEquipmentSummary(building) {
+  if (!building?.id || !LAB_EQUIPMENT[building.id]) return null;
+
+  const current = Array(24).fill(0);
+  const optimized = Array(24).fill(0);
+  let steadyAnnualKwh = 0;
+
+  const rows = LAB_EQUIPMENT[building.id].map(item => {
+    const spec = LAB_EQUIPMENT_LIBRARY[item.type];
+    const annualKwh = spec.kw * spec.hoursPerDay * 365 * item.qty;
+    const shiftableKwh = annualKwh * spec.shiftableShare;
+    const recoverableHeatMmbtu = annualKwh * spec.heatRecoveryShare * 0.003412 * 0.35;
+    if (STEADY_LOAD_TYPES.includes(item.type)) steadyAnnualKwh += annualKwh;
+    return { ...item, annualKwh, shiftableKwh, recoverableHeatMmbtu };
+  });
+
+  return {
+    rows,
+    annualKwh: rows.reduce((sum, row) => sum + row.annualKwh, 0),
+    shiftableKwh: rows.reduce((sum, row) => sum + row.shiftableKwh, 0),
+    recoverableHeatMmbtu: rows.reduce((sum, row) => sum + row.recoverableHeatMmbtu, 0),
+    shiftableShare: rows.reduce((sum, row) => sum + row.shiftableKwh, 0) / (rows.reduce((sum, row) => sum + row.annualKwh, 0) || 1),
+    steadyLoadShare: steadyAnnualKwh / (rows.reduce((sum, row) => sum + row.annualKwh, 0) || 1),
+    currentPeakKw: Math.max(...current),
+    peakShavedKw: Math.max(0, Math.max(...current) - Math.max(...optimized)),
+    flexDrivers: [...rows].sort((a, b) => b.shiftableKwh - a.shiftableKwh),
+    heatDrivers: [...rows].sort((a, b) => b.recoverableHeatMmbtu - a.recoverableHeatMmbtu),
+  };
+}
+```
+
 ### 5. Recommendation engine
 
 `getInterventionPlan(building)` is the core intervention-selection logic.
@@ -199,6 +250,39 @@ The recommendation logic uses different signals for different intervention types
 
 This is the real "insights" behavior of GreenGrid. The app is not only saying a building is inefficient; it is also saying what kind of action fits that building's operating pattern.
 
+Representative snippet from the live logic:
+
+```js
+function getInterventionPlan(building) {
+  const summary = getLabEquipmentSummary(building);
+  const topFlexType = summary.flexDrivers[0]?.type || '';
+  const topHeatType = summary.heatDrivers[0]?.type || '';
+
+  const ventilationHeavy = building.hoods >= 35 || building.co2 >= 900;
+  const strongShiftWindow =
+    summary.shiftableKwh >= 180000 &&
+    LOAD_CONTROLLER_TYPES.includes(topFlexType);
+  const strongHeatLoop =
+    summary.recoverableHeatMmbtu >= 320 &&
+    HEAT_REUSE_TYPES.includes(topHeatType);
+  const steadyPeakProfile =
+    summary.currentPeakKw >= 75 &&
+    summary.steadyLoadShare >= 0.48 &&
+    (building.age > 25 || !building.meter);
+
+  let primary = 'HVAC';
+  if (ventilationHeavy) primary = 'HVAC';
+  else if (strongHeatLoop && summary.shiftableKwh < 250000) primary = 'Heat Reuse';
+  else if (steadyPeakProfile && summary.peakShavedKw <= 42) primary = 'Thermal Storage';
+  else if (strongShiftWindow) primary = 'Load Controller';
+
+  return {
+    title: primary,
+    detail: 'Built from hoods, CO2, shiftable equipment, recoverable heat, and steady peak behavior.'
+  };
+}
+```
+
 ### 6. Insight outputs in the UI
 
 The main insight rendering functions are:
@@ -210,6 +294,37 @@ The main insight rendering functions are:
 - `renderHourlyCostWindow()`: fetches live US48 demand from EIA and converts it into an estimated hourly electricity cost window
 
 The hourly cost chart uses live data when the EIA request works. If it does not, the app falls back to the baked-in demand snapshot inside `index.html`.
+
+Representative snippet from the live logic:
+
+```js
+function initHotspotPage() {
+  const sorted = [...BUILDINGS].sort((a,b)=>computeRisk(b)-computeRisk(a));
+
+  sorted.slice(0,12).forEach((b,i) => {
+    const r = computeRisk(b);
+    const rl = riskLabel(r);
+    const plan = getInterventionPlan(b);
+
+    // Render hotspot row with:
+    // - rank
+    // - risk score / label
+    // - smart meter status
+    // - recommended intervention
+    // - explanatory detail
+  });
+
+  renderHourlyCostWindow();
+}
+```
+
+That sequence is the hotspot pipeline:
+
+1. `BUILDINGS` supplies the campus signals.
+2. `computeRisk()` ranks where GreenGrid should look first.
+3. `getLabEquipmentSummary()` adds deeper operational context for labs.
+4. `getInterventionPlan()` selects the best intervention type.
+5. `initHotspotPage()` renders the ranked queue the user sees.
 
 ## The Automation / Model Layer
 
